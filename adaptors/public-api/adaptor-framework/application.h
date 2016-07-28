@@ -126,6 +126,8 @@ public:
   /**
    * @brief This is the constructor for applications without an argument list.
    * @SINCE_1_0.0
+   * @PRIVLEVEL_PUBLIC
+   * @PRIVILEGE_DISPLAY
    */
   static Application New();
 
@@ -133,6 +135,8 @@ public:
    * @brief This is the constructor for applications.
    *
    * @SINCE_1_0.0
+   * @PRIVLEVEL_PUBLIC
+   * @PRIVILEGE_DISPLAY
    * @param[in,out]  argc        A pointer to the number of arguments
    * @param[in,out]  argv        A pointer the the argument list
    */
@@ -142,9 +146,12 @@ public:
    * @brief This is the constructor for applications with a name
    *
    * @SINCE_1_0.0
+   * @PRIVLEVEL_PUBLIC
+   * @PRIVILEGE_DISPLAY
    * @param[in,out]  argc        A pointer to the number of arguments
    * @param[in,out]  argv        A pointer the the argument list
    * @param[in]      stylesheet  The path to user defined theme file
+   * @note If the stylesheet is not specified, then the library's default stylesheet will not be overridden.
    */
   static Application New( int* argc, char **argv[], const std::string& stylesheet );
 
@@ -152,10 +159,13 @@ public:
    * @brief This is the constructor for applications with a name
    *
    * @SINCE_1_0.0
+   * @PRIVLEVEL_PUBLIC
+   * @PRIVILEGE_DISPLAY
    * @param[in,out]  argc        A pointer to the number of arguments
    * @param[in,out]  argv        A pointer the the argument list
    * @param[in]      stylesheet  The path to user defined theme file
    * @param[in]      windowMode  A member of WINDOW_MODE
+   * @note If the stylesheet is not specified, then the library's default stylesheet will not be overridden.
    */
   static Application New( int* argc, char **argv[], const std::string& stylesheet, WINDOW_MODE windowMode );
 
@@ -258,6 +268,15 @@ public:
    */
   void ReplaceWindow(PositionSize windowPosition, const std::string& name);
 
+  /**
+   * @brief Get path application resources are stored at
+   *
+   * @SINCE_1_2.2
+   * @return the full path of the resources
+   */
+  static std::string GetResourcePath();
+
+
 public: // Stereoscopy
 
   /**
@@ -277,6 +296,8 @@ public: // Stereoscopy
   /**
    * @brief Set the stereo base (eye separation) for Stereoscopic 3D
    *
+   * The stereo base is the distance in millimetres between the eyes. Typical values are
+   * between 50mm and 70mm. The default value is 65mm.
    * @SINCE_1_0.0
    * @param[in] stereoBase The stereo base (eye separation) for Stereoscopic 3D
    */
@@ -366,11 +387,13 @@ public:  // Signals
   AppSignalType& MemoryLowSignal();
 
 public: // Not intended for application developers
+  /// @cond internal
   /**
    * @brief Internal constructor
    * @SINCE_1_0.0
    */
   explicit DALI_INTERNAL Application(Internal::Adaptor::Application* application);
+  /// @endcond
 };
 
 /**

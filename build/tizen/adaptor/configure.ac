@@ -189,13 +189,13 @@ AC_ARG_WITH([tizen-2-2-compatibility],
 
 # Tizen Profile options
 AC_ARG_ENABLE([profile],
-              [AC_HELP_STRING([--enable-profile=COMMON,MOBILE,WEARABLE,TV,UBUNTU],
+              [AC_HELP_STRING([--enable-profile=COMMON,MOBILE,WEARABLE,TV,IVI,UBUNTU],
                             [Select the variant of tizen])],
               [enable_profile=$enableval],
               [enable_profile=UBUNTU])
 
 # Ensure valid profile selected
-if test "x$enable_profile" != "xCOMMON" -a "x$enable_profile" != "xMOBILE" -a "x$enable_profile" != "xWEARABLE" -a "x$enable_profile" != "xTV" -a "x$enable_profile" != "xUBUNTU"; then
+if test "x$enable_profile" != "xCOMMON" -a "x$enable_profile" != "xMOBILE" -a "x$enable_profile" != "xWEARABLE" -a "x$enable_profile" != "xTV" -a "x$enable_profile" != "xIVI" -a "x$enable_profile" != "xUBUNTU"; then
   AC_MSG_ERROR([$enable_profile is an invalid profile])
 fi
 
@@ -210,6 +210,7 @@ AM_CONDITIONAL([COMMON_PROFILE], [test x$enable_profile = xCOMMON])
 AM_CONDITIONAL([MOBILE_PROFILE], [test x$enable_profile = xMOBILE])
 AM_CONDITIONAL([WEARABLE_PROFILE], [test x$enable_profile = xWEARABLE])
 AM_CONDITIONAL([TV_PROFILE], [test x$enable_profile = xTV])
+AM_CONDITIONAL([IVI_PROFILE], [test x$enable_profile = xIVI])
 AM_CONDITIONAL([UBUNTU_PROFILE], [test x$enable_profile = xUBUNTU])
 AM_CONDITIONAL([WAYLAND], [test x$enable_wayland = xyes])
 AM_CONDITIONAL([USE_EFL], [test x$enable_efl = xyes])
@@ -248,6 +249,10 @@ fi
 fi
 
 if test "x$enable_profile" = "xTV"; then
+PKG_CHECK_MODULES(OPENGLES20, glesv2)
+fi
+
+if test "x$enable_profile" = "xIVI"; then
 PKG_CHECK_MODULES(OPENGLES20, glesv2)
 fi
 
@@ -328,6 +333,12 @@ else
   dataReadOnlyDir=${prefix}/share/dali/
 fi
 
+if test x$TIZEN_PLATFORM_CONFIG_SUPPORTED != x; then
+  tizenPlatformConfigSupported=$TIZEN_PLATFORM_CONFIG_SUPPORTED
+else
+  tizenPlatformConfigSupported=0
+fi
+
 if test x$FONT_CONFIGURATION_FILE != x; then
   fontConfigurationFile=$FONT_CONFIGURATION_FILE
 fi
@@ -337,6 +348,7 @@ AC_SUBST(dataReadOnlyDir)
 AC_SUBST(DALI_ADAPTOR_CFLAGS)
 AC_SUBST(DALI_PROFILE_CFLAGS)
 AC_SUBST(fontConfigurationFile)
+AC_SUBST(tizenPlatformConfigSupported)
 
 # Specify the include directory for development headers
 #devincludepath=${includedir}/dali/internal
@@ -376,6 +388,7 @@ Configuration
   Building with EFL Libraries:      $enable_efl
   Using Tizen APP FW libraries:     $enable_appfw
   OpenGL ES version:                $enable_gles
+  Tizen Platform Config supported   $tizenPlatformConfigSupported
   TizenVR Engine:                   $enable_tizenvr
   TizenVR Engine Dir:               $with_tizenvr_dir
 "
