@@ -27,6 +27,7 @@
 #include <common/adaptor-impl.h>
 #include <singleton-service-impl.h>
 #include <lifecycle-controller-impl.h>
+#include <iostream> //TODOVR
 
 namespace Dali
 {
@@ -110,10 +111,10 @@ void Application::CreateWindow()
 {
   PositionSize windowPosition(0, 0, 0, 0);  // this will use full screen
 
-  if( mCommandLineOptions->stageWidth > 0 && mCommandLineOptions->stageHeight > 0 )
+  if( mCommandLineOptions->stageWidth.set && mCommandLineOptions->stageHeight.set )
   {
     // Command line options override environment options and full screen
-    windowPosition = PositionSize( 0, 0, mCommandLineOptions->stageWidth, mCommandLineOptions->stageHeight );
+    windowPosition = PositionSize( 0, 0, mCommandLineOptions->stageWidth.value, mCommandLineOptions->stageHeight.value );
   }
   else if( mEnvironmentOptions.GetWindowWidth() && mEnvironmentOptions.GetWindowHeight() )
   {
@@ -176,18 +177,25 @@ void Application::OnInit()
   mAdaptor->Start();
 
   // Check if user requires no vsyncing and set on X11 Adaptor
-  if (mCommandLineOptions->noVSyncOnRender)
+  bool vsyncOnRender = true;
+  if( mCommandLineOptions->noVSyncOnRender.set )
   {
-    mAdaptor->SetUseHardwareVSync(false);
+    vsyncOnRender = mCommandLineOptions->noVSyncOnRender.value;
+  }
+  mAdaptor->SetUseHardwareVSync( vsyncOnRender );
+
+  if( mCommandLineOptions->stereoBase.set )
+  {
+    std::cout << "todor: setstereobase:" << mCommandLineOptions->stereoBase.value << std::endl;
+    Internal::Adaptor::Adaptor::GetImplementation( *mAdaptor ).SetStereoBase( mCommandLineOptions->stereoBase.value );
   }
 
-  Internal::Adaptor::Adaptor::GetImplementation( *mAdaptor ).SetStereoBase( mCommandLineOptions->stereoBase );
-  if( mCommandLineOptions->viewMode != 0 )
+  if( mCommandLineOptions->viewMode.set )
   {
     ViewMode viewMode = MONO;
-    if( mCommandLineOptions->viewMode <= STEREO_INTERLACED )
+    if( mCommandLineOptions->viewMode.value <= STEREO_INTERLACED )
     {
-      viewMode = static_cast<ViewMode>( mCommandLineOptions->viewMode );
+      viewMode = static_cast<ViewMode>( mCommandLineOptions->viewMode.value );
     }
     Internal::Adaptor::Adaptor::GetImplementation( *mAdaptor ).SetViewMode( viewMode );
   }

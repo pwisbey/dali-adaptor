@@ -92,11 +92,7 @@ void ShowHelp()
 
 } // unnamed namespace
 
-CommandLineOptions::CommandLineOptions(int *argc, char **argv[])
-: noVSyncOnRender(0),
-  stageWidth(0), stageHeight(0),
-  viewMode(0),
-  stereoBase(65)
+CommandLineOptions::CommandLineOptions( int *argc, char **argv[] )
 {
   // Exit gracefully if no arguments provided
   if ( !argc || !argv )
@@ -114,13 +110,13 @@ CommandLineOptions::CommandLineOptions(int *argc, char **argv[])
 
     const struct option options[]=
     {
-      { EXPECTED_ARGS[OPTION_NO_VSYNC].opt,     no_argument,       &noVSyncOnRender, 1   },  // "--no-vsync"
-      { EXPECTED_ARGS[OPTION_STAGE_WIDTH].opt,  required_argument, NULL,             'w' },  // "--width"
-      { EXPECTED_ARGS[OPTION_STAGE_HEIGHT].opt, required_argument, NULL,             'h' },  // "--height"
-      { EXPECTED_ARGS[OPTION_DPI].opt,          required_argument, NULL,             'd' },  // "--dpi"
-      { EXPECTED_ARGS[OPTION_STEREO_MODE].opt,  required_argument, NULL,             'v' },  // "--view"
-      { EXPECTED_ARGS[OPTION_STEREO_BASE].opt,  required_argument, NULL,             's' },  // "--stereo-base"
-      { EXPECTED_ARGS[OPTION_HELP].opt,         no_argument,       &help,            '?' },  // "--help"
+      { EXPECTED_ARGS[OPTION_NO_VSYNC].opt,     no_argument,       &noVSyncOnRender.value, 1   },  // "--no-vsync"
+      { EXPECTED_ARGS[OPTION_STAGE_WIDTH].opt,  required_argument, NULL,                   'w' },  // "--width"
+      { EXPECTED_ARGS[OPTION_STAGE_HEIGHT].opt, required_argument, NULL,                   'h' },  // "--height"
+      { EXPECTED_ARGS[OPTION_DPI].opt,          required_argument, NULL,                   'd' },  // "--dpi"
+      { EXPECTED_ARGS[OPTION_STEREO_MODE].opt,  required_argument, NULL,                   'v' },  // "--view"
+      { EXPECTED_ARGS[OPTION_STEREO_BASE].opt,  required_argument, NULL,                   's' },  // "--stereo-base"
+      { EXPECTED_ARGS[OPTION_HELP].opt,         no_argument,       &help,                  '?' },  // "--help"
       { 0, 0, 0, 0 } // end of options
     };
 
@@ -153,7 +149,8 @@ CommandLineOptions::CommandLineOptions(int *argc, char **argv[])
         {
           if ( optarg )
           {
-            stageWidth = atoi( optarg );
+            stageWidth.value = atoi( optarg );
+            stageWidth.set = true;
             optionProcessed = true;
           }
           break;
@@ -163,7 +160,8 @@ CommandLineOptions::CommandLineOptions(int *argc, char **argv[])
         {
           if ( optarg )
           {
-            stageHeight = atoi( optarg );
+            stageHeight.value = atoi( optarg );
+            stageHeight.set = true;
             optionProcessed = true;
           }
           break;
@@ -173,7 +171,8 @@ CommandLineOptions::CommandLineOptions(int *argc, char **argv[])
         {
           if ( optarg )
           {
-            stageDPI.assign( optarg );
+            stageDPI.value.assign( optarg );
+            stageDPI.set = true;
             optionProcessed = true;
           }
           break;
@@ -183,7 +182,8 @@ CommandLineOptions::CommandLineOptions(int *argc, char **argv[])
         {
           if ( optarg )
           {
-            viewMode = atoi(optarg);
+            viewMode.value = atoi( optarg );
+            viewMode.set = true;
             optionProcessed = true;
           }
           break;
@@ -193,7 +193,8 @@ CommandLineOptions::CommandLineOptions(int *argc, char **argv[])
         {
           if ( optarg )
           {
-            stereoBase = atoi(optarg);
+            stereoBase.value = atoi( optarg );
+            stereoBase.set = true;
             optionProcessed = true;
           }
           break;

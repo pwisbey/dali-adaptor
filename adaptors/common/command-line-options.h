@@ -52,13 +52,26 @@ struct CommandLineOptions
 {
 public:
 
+    // TODOVR
+    template< typename T >
+    struct Option
+    {
+      T value;
+      bool set;
+
+      Option()
+      : set( false )
+      {
+      }
+    };
+
   /**
    * Constructor
    * @param[in,out]  argc  The number of arguments
    * @param[in,out]  argv  The argument list
    * @note Supported options are stripped from argv, and argc is updated appropriately.
    */
-  CommandLineOptions(int *argc, char **argv[]);
+  CommandLineOptions( int *argc, char **argv[] );
 
   /**
    * Destructor
@@ -67,12 +80,13 @@ public:
 
 public: // Command line parsed values
 
-  int noVSyncOnRender;  ///< If 1, then the user does not want VSync on Render
-  int stageWidth;       ///< The width of the stage required.  0 if not set.
-  int stageHeight;      ///< The height of the stage required.   0 if not set.
-  int viewMode;         ///< Stereocopic 3D view mode (0=MONO, 1=STEREO_HORZ, 2=STEREO_VERT, 3=STEREO_INTERLACED)
-  int stereoBase;       ///< The distance in millimeters between left/right cameras
-  std::string stageDPI; ///< DPI stored as hxv, where h is horizontal DPI and v is vertical DPI
+  Option<int> noVSyncOnRender;  ///< If 1, then the user does not want VSync on Render
+  Option<int> stageWidth;       ///< The width of the stage required.  0 if not set.
+  Option<int> stageHeight;      ///< The height of the stage required.   0 if not set.
+  Option<int> viewMode;         ///< Stereocopic 3D view mode (0 = MONO, 1 = STEREO_HORZ, 2 = STEREO_VERT, 3 = STEREO_INTERLACED)
+  Option<int> stereoBase;       ///< The distance in millimeters between left/right cameras
+  Option<std::string> stageDPI; ///< DPI stored as hxv, where h is horizontal DPI and v is vertical DPI
+
 };
 
 } // namespace Adaptor
