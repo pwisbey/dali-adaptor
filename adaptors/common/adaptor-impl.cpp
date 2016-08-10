@@ -26,6 +26,7 @@
 #include <dali/integration-api/profiling.h>
 #include <dali/integration-api/input-options.h>
 #include <dali/integration-api/events/touch-event-integ.h>
+#include <dali/integration-api/gyroscope-sensor.h>
 
 // INTERNAL INCLUDES
 #include <base/thread-controller.h>
@@ -51,7 +52,6 @@
 #include <object-profiler.h>
 #include <base/display-connection.h>
 #include <window-impl.h>
-
 #include <tizen-logging.h>
 
 using Dali::TextAbstraction::FontClient;
@@ -132,11 +132,13 @@ void Adaptor::Initialize( Dali::Configuration::ContextLoss configuration )
     mGLES = new GlImplementation();
   }
 
+  mGyroscopeSensor = CreateGyroscopeSensor();
+
   mEglFactory = new EglFactory();
 
   EglSyncImplementation* eglSyncImpl = mEglFactory->GetSyncImplementation();
 
-  mCore = Integration::Core::New( *this, *mPlatformAbstraction, *mGLES, *eglSyncImpl, *mGestureManager, dataRetentionPolicy );
+  mCore = Integration::Core::New( *this, *mPlatformAbstraction, *mGLES, *eglSyncImpl, *mGestureManager, mGyroscopeSensor, dataRetentionPolicy );
 
   const unsigned int timeInterval = mEnvironmentOptions->GetObjectProfilerInterval();
   if( 0u < timeInterval )

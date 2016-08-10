@@ -455,6 +455,8 @@ void CombinedUpdateRenderController::UpdateRenderThread()
     mRenderHelper.PostRender();
 
     // Trigger event thread to request Update/Render thread to sleep if update not required
+    // if no VR ( gyroscope )
+
     if( ( Integration::KeepUpdating::NOT_REQUESTED == keepUpdatingStatus ) &&
         ! renderStatus.NeedsUpdate() )
     {
@@ -467,6 +469,10 @@ void CombinedUpdateRenderController::UpdateRenderThread()
       updateRequired = true;
     }
 
+    // when using gyroscope update always required
+    updateRequired = true;
+
+    //DALI_LOG_ERROR("Updated");
     //////////////////////////////
     // FRAME TIME
     //////////////////////////////

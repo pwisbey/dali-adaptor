@@ -17,6 +17,7 @@
 
 // CLASS HEADER
 #include <adaptor-impl.h>
+#include <ubuntu/gyroscope-sensor-impl-ubuntu.h>
 
 namespace Dali
 {
@@ -35,6 +36,11 @@ void Adaptor::GetDataStoragePath( std::string& path)
 void Adaptor::GetAppId( std::string& appId )
 {
   appId = "";
+}
+
+Dali::Integration::GyroscopeSensor* Adaptor::CreateGyroscopeSensor()
+{
+  return new Dali::Internal::Adaptor::GyroscopeSensor();
 }
 
 } // namespace Adaptor

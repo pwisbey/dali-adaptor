@@ -54,6 +54,7 @@ namespace Integration
 {
 class Core;
 class GlAbstraction;
+class GyroscopeSensor;
 }
 
 namespace Internal
@@ -426,6 +427,10 @@ public: // Signals
     return mLanguageChangedSignal;
   }
 
+private: // Sensors
+
+  Dali::Integration::GyroscopeSensor* CreateGyroscopeSensor();
+
 private: // From Dali::Internal::Adaptor::CoreEventInterface
 
   /**
@@ -539,6 +544,8 @@ private: // Data
   GlImplementation*                     mGLES;                        ///< GL implementation
   GlSyncImplementation*                 mGlSync;                      ///< GL Sync implementation
   EglFactory*                           mEglFactory;                  ///< EGL Factory
+
+  Dali::Integration::GyroscopeSensor*   mGyroscopeSensor;
 
   Any                                   mNativeWindow;                ///< window identifier
   RenderSurface*                        mSurface;                     ///< Current surface

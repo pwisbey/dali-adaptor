@@ -18,6 +18,7 @@
 // CLASS HEADER
 #include <adaptor-impl.h>
 
+#include <tizen/gyroscope-sensor-impl-tizen.h>
 // EXTERNAL INCLUDES
 #ifdef  USE_APPFW
 #include <app.h>
@@ -63,6 +64,11 @@ void Adaptor::GetAppId( std::string& appId )
     appId = "";
   }
 #endif
+}
+
+Dali::Integration::GyroscopeSensor* Adaptor::CreateGyroscopeSensor()
+{
+  return new Dali::Internal::Adaptor::GyroscopeSensor();
 }
 
 } // namespace Adaptor
