@@ -29,7 +29,7 @@ namespace Dali
 const unsigned int ADAPTOR_MAJOR_VERSION = 1;
 const unsigned int ADAPTOR_MINOR_VERSION = 1;
 const unsigned int ADAPTOR_MICRO_VERSION = 39;
-const char * const ADAPTOR_BUILD_DATE    = __DATE__ " " __TIME__;
+__attribute__((__section__(".tizen.build-id"))) const char ADAPTOR_BUILD_DATE[]    = __DATE__ " " __TIME__;
 
 #ifdef DEBUG_ENABLED
 namespace
