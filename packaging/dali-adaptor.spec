@@ -283,7 +283,7 @@ FONT_CONFIGURATION_FILE="%{font_configuration_file}" ; export FONT_CONFIGURATION
 #--with-libuv=/usr/include/node/ \ # only affects dali-adaptor-uv
 
 # Set up the build via configure.
-%configure --prefix=$PREFIX --with-jpeg-turbo --enable-gles=%{target_gles_version} --enable-shaderbincache=%{shaderbincache_flag} --enable-profile=%{dali_profile} \
+%configure --prefix=$PREFIX --with-jpeg-turbo --enable-tizenvr --enable-gles=%{target_gles_version} --enable-shaderbincache=%{shaderbincache_flag} --enable-profile=%{dali_profile} \
 %if 0%{?dali_feedback_plugin}
            --enable-feedback \
 %endif

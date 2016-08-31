@@ -54,7 +54,7 @@ namespace Integration
 {
 class Core;
 class GlAbstraction;
-class GyroscopeSensor;
+class VrEngine;
 }
 
 namespace Internal
@@ -427,9 +427,9 @@ public: // Signals
     return mLanguageChangedSignal;
   }
 
-private: // Sensors
+private: // VR
 
-  Dali::Integration::GyroscopeSensor* CreateGyroscopeSensor();
+  Dali::Integration::VrEngine* CreateVrEngine();
 
 private: // From Dali::Internal::Adaptor::CoreEventInterface
 
@@ -545,7 +545,8 @@ private: // Data
   GlSyncImplementation*                 mGlSync;                      ///< GL Sync implementation
   EglFactory*                           mEglFactory;                  ///< EGL Factory
 
-  Dali::Integration::GyroscopeSensor*   mGyroscopeSensor;
+  // TODOVR
+  Dali::Integration::VrEngine*          mVrEngine;
 
   Any                                   mNativeWindow;                ///< window identifier
   RenderSurface*                        mSurface;                     ///< Current surface

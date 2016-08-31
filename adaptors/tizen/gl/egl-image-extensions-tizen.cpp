@@ -22,7 +22,7 @@
 // EXTERNAL INCLUDES
 #if DALI_GLES_VERSION >= 30
 #include <GLES3/gl3.h>
-#include <GLES3/gl3ext.h>
+#include <GLES2/gl2ext.h>
 
 #else
 #include <GLES2/gl2.h>

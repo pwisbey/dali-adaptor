@@ -101,13 +101,16 @@ bool EglImplementation::InitializeGles( EGLNativeDisplayType display, bool isOwn
     mContextAttribs.PushBack( DALI_GLES_VERSION / 10 );
     mContextAttribs.PushBack( EGL_CONTEXT_MINOR_VERSION_KHR );
     mContextAttribs.PushBack( DALI_GLES_VERSION % 10 );
+    mContextAttribs.PushBack( EGL_CONTEXT_PRIORITY_LEVEL_IMG );
+    mContextAttribs.PushBack( EGL_CONTEXT_PRIORITY_HIGH_IMG );
 
 #else // DALI_GLES_VERSION >= 30
 
-    mContextAttribs.Reserve(3);
+    mContextAttribs.Reserve(5);
     mContextAttribs.PushBack( EGL_CONTEXT_CLIENT_VERSION );
     mContextAttribs.PushBack( 2 );
-
+    mContextAttribs.PushBack( EGL_CONTEXT_PRIORITY_LEVEL_IMG );
+    mContextAttribs.PushBack( EGL_CONTEXT_PRIORITY_HIGH_IMG );
 #endif // DALI_GLES_VERSION >= 30
 
     mContextAttribs.PushBack( EGL_NONE );
@@ -161,7 +164,8 @@ void EglImplementation::MakeContextCurrent()
 
   if(mIsOwnSurface)
   {
-    eglMakeCurrent( mEglDisplay, mCurrentEglSurface, mCurrentEglSurface, mEglContext );
+    //eglMakeCurrent( mEglDisplay, mCurrentEglSurface, mCurrentEglSurface, mEglContext );
+    eglMakeCurrent( mEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, mEglContext );
   }
 
   EGLint error = eglGetError();
@@ -283,7 +287,6 @@ void EglImplementation::ChooseConfig( bool isWindowType, ColorDepth depth )
   }
 
   configAttribs.PushBack( EGL_RENDERABLE_TYPE );
-
 #if DALI_GLES_VERSION >= 30
 
 #ifdef _ARCH_ARM_
@@ -292,14 +295,13 @@ void EglImplementation::ChooseConfig( bool isWindowType, ColorDepth depth )
   // There is a bug in the desktop emulator
   // Requesting for ES3 causes eglCreateContext even though it allows to ask
   // for a configuration that supports GLES 3.0
-  configAttribs.PushBack( EGL_OPENGL_ES2_BIT );
+  configAttribs.PushBack( EGL_OPENGL_ES3_BIT_KHR );
 #endif // _ARCH_ARM_
 
 #else // DALI_GLES_VERSION >= 30
 
   DALI_LOG_WARNING( "Using OpenGL ES 2 \n" );
   configAttribs.PushBack( EGL_OPENGL_ES2_BIT );
-
 #endif //DALI_GLES_VERSION >= 30
 
 #if DALI_GLES_VERSION >= 30
@@ -317,11 +319,13 @@ void EglImplementation::ChooseConfig( bool isWindowType, ColorDepth depth )
 
   configAttribs.PushBack( EGL_ALPHA_SIZE );
 #ifdef _ARCH_ARM_
-  configAttribs.PushBack( (depth == COLOR_DEPTH_32) ? 8 : 0 );
+  configAttribs.PushBack( 8 );
+  //configAttribs.PushBack( (depth == COLOR_DEPTH_32) ? 8 : 0 );
 #else
   // There is a bug in the desktop emulator
   // setting EGL_ALPHA_SIZE to 8 results in eglChooseConfig failing
-  configAttribs.PushBack( 0 );
+  configAttribs.PushBack( 8 );
+  //configAttribs.PushBack( (depth == COLOR_DEPTH_32) ? 8 : 0 );
 #endif // _ARCH_ARM_
 
   configAttribs.PushBack( EGL_DEPTH_SIZE );
@@ -454,6 +458,12 @@ EGLDisplay EglImplementation::GetContext() const
 {
   return mEglContext;
 }
+
+EGLSurface EglImplementation::GetCurrentSurface() const
+{
+  return mCurrentEglSurface;
+}
+
 
 } // namespace Adaptor
 

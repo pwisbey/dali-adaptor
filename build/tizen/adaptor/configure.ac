@@ -49,7 +49,6 @@ PKG_CHECK_MODULES(FRIBIDI, fribidi)
 PKG_CHECK_MODULES(TTRACE,  ttrace, AC_DEFINE(ENABLE_TTRACE, 1, [ttrace available]),
                   [ AC_MSG_NOTICE([Tizen Trace not avaiable]) ]
                   )
-
 # Currently, dali-adaptor always requires EFL on all platforms.
 # (on Wayland & X11, on Tizen devices & Ubuntu PC).
 enable_efl=yes
@@ -105,6 +104,25 @@ AC_ARG_ENABLE(networklogging,
               [enable_networklogging=$enableval],
               [enable_networklogging=no])
 
+AC_ARG_ENABLE([tizenvr],
+              [AC_HELP_STRING([--enable-tizenvr],
+                              [Build with TizenVR engine support])],
+              [enable_tizenvr=$enableval],
+              [enable_tizenvr=no])
+
+AC_ARG_WITH([tizenvr_dir],
+              [AC_HELP_STRING([--with-tizenvr-dir],
+                              [Specifies Tizen VR engine directory])],
+              [with_tizenvr_dir=$withval],
+              [with_tizenvr_dir=/usr/include/vr-engine])  
+
+if test "x$enable_tizenvr" = "xyes"; then
+  DALI_ADAPTOR_CFLAGS="$DALI_ADAPTOR_CFLAGS -DTIZENVR_ENABLED"
+fi
+
+if test "x$with_tizenvr_dir" != "x0"; then
+  DALI_ADAPTOR_CFLAGS="$DALI_ADAPTOR_CFLAGS -I$with_tizenvr_dir"  
+fi
 
 if test "x$enable_debug" = "xyes"; then
   DALI_ADAPTOR_CFLAGS="$DALI_ADAPTOR_CFLAGS -DDEBUG_ENABLED"
@@ -235,6 +253,7 @@ fi
 
 if test "x$enable_profile" = "xUBUNTU"; then
 PKG_CHECK_MODULES(OPENGLES20, glesv2 egl)
+#PKG_CHECK_MODULES(OPENGLES20, gl egl)
 else
 
 
@@ -357,6 +376,8 @@ Configuration
   Building with EFL Libraries:      $enable_efl
   Using Tizen APP FW libraries:     $enable_appfw
   OpenGL ES version:                $enable_gles
+  TizenVR Engine:                   $enable_tizenvr
+  TizenVR Engine Dir:               $with_tizenvr_dir
 "
 # optional output of node.js source path if we're building with libuv
 if test "x$build_for_libuv" != "xno"; then

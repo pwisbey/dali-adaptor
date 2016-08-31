@@ -455,7 +455,7 @@ void CombinedUpdateRenderController::UpdateRenderThread()
     mRenderHelper.PostRender();
 
     // Trigger event thread to request Update/Render thread to sleep if update not required
-    // if no VR ( gyroscope )
+    // if no VR
 
     if( ( Integration::KeepUpdating::NOT_REQUESTED == keepUpdatingStatus ) &&
         ! renderStatus.NeedsUpdate() )

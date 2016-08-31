@@ -18,7 +18,7 @@
 // CLASS HEADER
 #include <adaptor-impl.h>
 
-#include <tizen/gyroscope-sensor-impl-tizen.h>
+#include <tizen/vr-engine-impl-tizen.h>
 // EXTERNAL INCLUDES
 #ifdef  USE_APPFW
 #include <app.h>
@@ -66,9 +66,9 @@ void Adaptor::GetAppId( std::string& appId )
 #endif
 }
 
-Dali::Integration::GyroscopeSensor* Adaptor::CreateGyroscopeSensor()
+Dali::Integration::VrEngine* Adaptor::CreateVrEngine()
 {
-  return new Dali::Internal::Adaptor::GyroscopeSensor();
+  return new Dali::Internal::Adaptor::VrEngineTizenVR( *this );
 }
 
 } // namespace Adaptor

@@ -26,7 +26,7 @@
 #include <dali/integration-api/profiling.h>
 #include <dali/integration-api/input-options.h>
 #include <dali/integration-api/events/touch-event-integ.h>
-#include <dali/integration-api/gyroscope-sensor.h>
+#include <dali/integration-api/vr-engine.h>
 
 // INTERNAL INCLUDES
 #include <base/thread-controller.h>
@@ -132,13 +132,14 @@ void Adaptor::Initialize( Dali::Configuration::ContextLoss configuration )
     mGLES = new GlImplementation();
   }
 
-  mGyroscopeSensor = CreateGyroscopeSensor();
+  // VR
+  mVrEngine = CreateVrEngine();
 
   mEglFactory = new EglFactory();
 
   EglSyncImplementation* eglSyncImpl = mEglFactory->GetSyncImplementation();
 
-  mCore = Integration::Core::New( *this, *mPlatformAbstraction, *mGLES, *eglSyncImpl, *mGestureManager, mGyroscopeSensor, dataRetentionPolicy );
+  mCore = Integration::Core::New( *this, *mPlatformAbstraction, *mGLES, *eglSyncImpl, *mGestureManager, dataRetentionPolicy, mVrEngine );
 
   const unsigned int timeInterval = mEnvironmentOptions->GetObjectProfilerInterval();
   if( 0u < timeInterval )

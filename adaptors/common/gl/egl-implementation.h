@@ -173,6 +173,12 @@ public:
    */
   EGLContext GetContext() const;
 
+  /**
+   * Returns current EGL surface
+   * @return Current EGL surface
+   */
+  EGLSurface GetCurrentSurface() const;
+
 private:
 
   Vector<EGLint>       mContextAttribs;

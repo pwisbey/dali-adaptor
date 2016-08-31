@@ -17,7 +17,7 @@
 
 // CLASS HEADER
 #include <adaptor-impl.h>
-#include <ubuntu/gyroscope-sensor-impl-ubuntu.h>
+#include <ubuntu/vr-engine-impl-ubuntu.h>
 
 namespace Dali
 {
@@ -38,10 +38,11 @@ void Adaptor::GetAppId( std::string& appId )
   appId = "";
 }
 
-Dali::Integration::GyroscopeSensor* Adaptor::CreateGyroscopeSensor()
+Dali::Integration::VrEngine* Adaptor::CreateVrEngine()
 {
-  return new Dali::Internal::Adaptor::GyroscopeSensor();
+  return new Dali::Internal::Adaptor::VrEngineTizenVR( *this );
 }
+
 
 } // namespace Adaptor
 
