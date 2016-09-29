@@ -142,7 +142,7 @@ BuildRequires:  pkgconfig(libtbm)
 # tpkp-curl (certificate pinning for libcurl functions) is only available in Tizen 3.0
 BuildRequires:  pkgconfig(tpkp-curl)
 
-####### BUILDING FOR X11#######
+####### BUILDING FOR X11 #######
 %else
 BuildRequires:  pkgconfig(egl)
 BuildRequires:  pkgconfig(xext)
@@ -296,9 +296,12 @@ TIZEN_PLATFORM_CONFIG_SUPPORTED="%{tizen_platform_config_supported}" ; export TI
 #--with-libuv=/usr/include/node/ \ # only affects dali-adaptor-uv
 
 # Set up the build via configure.
-%configure --prefix=$PREFIX --with-jpeg-turbo --enable-tizenvr --enable-gles=%{target_gles_version} --enable-shaderbincache=%{shaderbincache_flag} --enable-profile=%{dali_profile} \
+%configure --prefix=$PREFIX --with-jpeg-turbo --enable-gles=%{target_gles_version} --enable-shaderbincache=%{shaderbincache_flag} --enable-profile=%{dali_profile} \
 %if 0%{?dali_feedback_plugin}
            --enable-feedback \
+%endif
+%if 0%{?enable_tizenvr}
+           --enable-tizenvr \
 %endif
 %if 0%{?dali_videoplayer_plugin}
            --enable-videoplayer \
