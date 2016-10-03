@@ -164,8 +164,9 @@ void EglImplementation::MakeContextCurrent()
 
   if(mIsOwnSurface)
   {
-    //eglMakeCurrent( mEglDisplay, mCurrentEglSurface, mCurrentEglSurface, mEglContext );
-    eglMakeCurrent( mEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, mEglContext );
+    //TODOVR
+    //eglMakeCurrent( mEglDisplay, mCurrentEglSurface, mCurrentEglSurface, mEglContext );   // Normal
+    eglMakeCurrent( mEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, mEglContext );           // VR
   }
 
   EGLint error = eglGetError();

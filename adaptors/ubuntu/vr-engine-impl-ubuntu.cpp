@@ -373,41 +373,41 @@ bool VrEngineTizenVR::Get( const int property, void* output, int )
   {
     case EYE_BUFFER_COUNT:
       {
-      *(reinterpret_cast<int*>(output)) = mImpl->eyeBufferCount;
+        *( reinterpret_cast<int*>( output ) ) = mImpl->eyeBufferCount;
         return true;
       }
     case EYE_BUFFER_WIDTH:
       {
-        *(reinterpret_cast<int*>(output)) = mImpl->fbWidth;
+        *( reinterpret_cast<int*>( output ) ) = mImpl->fbWidth;
         return true;
       }
     case EYE_BUFFER_HEIGHT:
       {
-        *(reinterpret_cast<int*>(output)) = mImpl->fbHeight;
+        *( reinterpret_cast<int*>( output ) ) = mImpl->fbHeight;
         return true;
       }
     case EYE_LEFT_CURRENT_TEXTURE_ID:
       {
-        *(reinterpret_cast<int*>(output)) =
-            mImpl->eyeBuffers[(int)(mImpl->frameIndex%mImpl->frameBufferDepth)].colorTextures[0];
+        *( reinterpret_cast<int*>( output ) ) =
+          mImpl->eyeBuffers[(int)( mImpl->frameIndex % mImpl->frameBufferDepth )].colorTextures[0];
         return true;
       }
     case EYE_RIGHT_CURRENT_TEXTURE_ID:
       {
-        *(reinterpret_cast<int*>(output)) =
-            mImpl->eyeBuffers[(int)(mImpl->frameIndex%mImpl->frameBufferDepth)].colorTextures[1];
+        *( reinterpret_cast<int*>( output ) ) =
+          mImpl->eyeBuffers[(int)( mImpl->frameIndex % mImpl->frameBufferDepth )].colorTextures[1];
         return true;
       }
     case EYE_LEFT_CURRENT_FBO_ID:
       {
-        *(reinterpret_cast<int*>(output)) =
-            mImpl->eyeBuffers[(int)(mImpl->frameIndex%mImpl->frameBufferDepth)].fbos[0];
+        *( reinterpret_cast<int*>( output ) ) =
+          mImpl->eyeBuffers[(int)( mImpl->frameIndex % mImpl->frameBufferDepth )].fbos[0];
         return true;
       }
     case EYE_RIGHT_CURRENT_FBO_ID:
       {
-        *(reinterpret_cast<int*>(output)) =
-            mImpl->eyeBuffers[(int)(mImpl->frameIndex%mImpl->frameBufferDepth)].fbos[1];
+        *( reinterpret_cast<int*>( output ) ) =
+          mImpl->eyeBuffers[(int)( mImpl->frameIndex % mImpl->frameBufferDepth )].fbos[1];
         return true;
       }
     case EYE_CURRENT_POSE:
@@ -431,7 +431,7 @@ bool VrEngineTizenVR::Get( const int property, void* output, int )
             mImpl->ovrEnabled = false;
             return false;
           }
-          if( recv( mImpl->ovrSock, &tzvrPose, sizeof(eyePose_s), 0 ) < 0 )
+          if( recv( mImpl->ovrSock, &tzvrPose, sizeof( eyePose_s ), 0 ) < 0 )
           {
             mImpl->ovrEnabled = false;
             return false;
@@ -457,36 +457,36 @@ bool VrEngineTizenVR::Get( const int property, void* output, int )
   // color textures
   if( property >= EYE_LEFT_TEXTURE0_ID && property < EYE_LEFT_TEXTURE0_ID+64 )
   {
-    *(reinterpret_cast<int*>(output)) = mImpl->eyeBuffers[(int)property-EYE_LEFT_TEXTURE0_ID].colorTextures[0];
+    *( reinterpret_cast<int*>( output ) ) = mImpl->eyeBuffers[(int)property-EYE_LEFT_TEXTURE0_ID].colorTextures[0];
     return true;
   }
   else if( property >= EYE_RIGHT_TEXTURE0_ID && property < EYE_RIGHT_TEXTURE0_ID+64 )
   {
-    *(reinterpret_cast<int*>(output)) = mImpl->eyeBuffers[(int)property-EYE_RIGHT_TEXTURE0_ID].colorTextures[1];
+    *( reinterpret_cast<int*>( output ) ) = mImpl->eyeBuffers[(int)property-EYE_RIGHT_TEXTURE0_ID].colorTextures[1];
     return true;
   }
 
   // fbos
   else if( property >= EYE_LEFT_FBO_ID && property < EYE_LEFT_FBO_ID+64 )
   {
-    *(reinterpret_cast<int*>(output)) = mImpl->eyeBuffers[(int)property-EYE_LEFT_FBO_ID].fbos[0];
+    *( reinterpret_cast<int*>( output ) ) = mImpl->eyeBuffers[(int)property-EYE_LEFT_FBO_ID].fbos[0];
     return true;
   }
   else if( property >= EYE_RIGHT_FBO_ID && property < EYE_RIGHT_FBO_ID+64 )
   {
-    *(reinterpret_cast<int*>(output)) = mImpl->eyeBuffers[(int)property-EYE_RIGHT_FBO_ID].fbos[1];
+    *( reinterpret_cast<int*>( output ) ) = mImpl->eyeBuffers[(int)property-EYE_RIGHT_FBO_ID].fbos[1];
     return true;
   }
 
   // depth textures
   else if( property >= EYE_LEFT_DEPTH_TEXTURE_ID && property < EYE_LEFT_DEPTH_TEXTURE_ID+64 )
   {
-    *(reinterpret_cast<int*>(output)) = mImpl->eyeBuffers[(int)property-EYE_LEFT_DEPTH_TEXTURE_ID].depthTextures[0];
+    *( reinterpret_cast<int*>( output ) ) = mImpl->eyeBuffers[(int)property-EYE_LEFT_DEPTH_TEXTURE_ID].depthTextures[0];
     return true;
   }
   else if( property >= EYE_RIGHT_DEPTH_TEXTURE_ID && property < EYE_RIGHT_DEPTH_TEXTURE_ID+64 )
   {
-    *(reinterpret_cast<int*>(output)) = mImpl->eyeBuffers[(int)property-EYE_RIGHT_DEPTH_TEXTURE_ID].depthTextures[1];
+    *( reinterpret_cast<int*>( output ) ) = mImpl->eyeBuffers[(int)property-EYE_RIGHT_DEPTH_TEXTURE_ID].depthTextures[1];
     return true;
   }
   return false;
@@ -659,20 +659,41 @@ bool VrEngineTizenVR::CreateFramebufferTexture( GlImplementation& ctx, int fbo, 
   GL( ctx.FramebufferTexture2D( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0 ) );
 
   GL( fbStatus = ctx.CheckFramebufferStatus( GL_FRAMEBUFFER ) );
-  if( fbStatus != GL_FRAMEBUFFER_COMPLETE )
+
+  switch( fbStatus )
   {
-    if( fbStatus == GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT )
-      DALI_LOG_ERROR("GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT\n");
-    else if( fbStatus == GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS )
-      DALI_LOG_ERROR("GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS\n");
-    else if( fbStatus == GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT )
-      DALI_LOG_ERROR("GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT\n");
-    else if( fbStatus == GL_FRAMEBUFFER_UNSUPPORTED )
-      DALI_LOG_ERROR("GL_FRAMEBUFFER_UNSUPPORTED\n");
-    return false;
+    case GL_FRAMEBUFFER_COMPLETE:
+    {
+      // Status OK.
+      return true;
+    }
+
+    case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+    {
+      DALI_LOG_ERROR( "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT\n" );
+      break;
+    }
+
+    case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
+    {
+      DALI_LOG_ERROR( "GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS\n" );
+      break;
+    }
+
+    case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+    {
+      DALI_LOG_ERROR( "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT\n" );
+      break;
+    }
+
+    case GL_FRAMEBUFFER_UNSUPPORTED:
+    {
+      DALI_LOG_ERROR( "GL_FRAMEBUFFER_UNSUPPORTED\n" );
+      break;
+    }
   }
 
-  return true;
+  return false;
 }
 
 } // Adaptor
