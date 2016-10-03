@@ -4,7 +4,95 @@
 #include "vr-engine-impl-ubuntu.h"
 #define GL_DEPTH_COMPONENT24              0x81A6
 #ifdef TIZENVR_USE_DYNAMIC_LIBRARY
-#include "vr-engine/inc/Core/tzvr_types.h"
+#define GL_DEPTH_COMPONENT24              0x81A6
+#ifdef TIZENVR_USE_DYNAMIC_LIBRARY
+//#include "vr-engine/inc/Core/tzvr_types.h"
+// tzvr types inlined for now
+#ifndef __TZVR_TYPES_H__
+#define __TZVR_TYPES_H__
+//#include <tizen.h>
+#include <stdio.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef void *EGLDisplay;
+typedef void *EGLSurface;
+typedef void *EGLContext;
+
+#define RAW_QUAT 1
+typedef struct _tzvr_vec3f
+{
+  float x, y, z;
+}tzvr_vector3f;
+
+typedef struct tzvr_quat
+{
+  float w, x, y, z;
+}tzvr_quaternionF;
+
+typedef enum {
+  EYE_INDEX_LEFT = 0,
+  EYE_INDEX_RIGHT = 1,
+  EYE_INDEX_MAX = 2,
+}tzvr_eye_index_e;
+
+typedef enum {
+  TEXTURE_TYPE_2D = 0x0DE1,     /* GL_TEXUTRE_2D*/
+  //TEXTURE_TYPE_2D_EXTERNAL = ?,
+  TEXTURE_TYPE_2D_ARRAY = 0x8C1A,   /* GL_TEXUTRE_2D_ARRAY*/
+  TEXTURE_TYPE_CUBE = 0x8513,     /* GL_TEXUTRE_CUBE_MAP*/
+}tzvr_texture_type_e; /* TODO: add more supportable type*/
+
+typedef enum
+{
+    /* To disable chromatic aberration */
+    DISABLE_CHROMATIC_ABERRATION = 0x0,
+    /* To enable chromatic aberration */
+    ENABLE_CHROMATIC_ABERRATION
+}tzvr_chromatic_aberration_e;
+
+typedef struct eyePose {
+  float x, y, z;
+  float w;  /* For quaternion */
+  double timestamp;
+}eyePose_s;
+
+typedef struct tzvr_submit_params {
+  eyePose_s render_pose[EYE_INDEX_MAX];
+  long long frame_index;
+  float *view;
+  unsigned int min_vsync_wait;
+  tzvr_chromatic_aberration_e chromatic_value;
+}tzvr_submit_params_s;
+
+/* Tizen VR Error enumaration */
+typedef enum
+{
+    /* Successful */
+    TZ_VR_SUCCESS = 0,
+    /* Out of memory */
+    TZ_VR_ERROR_OUT_OF_MEMORY = 1,
+    /* Invalid parameter */
+    TZ_VR_ERROR_INVALID_PARAMETER = 2,
+    /* Invalid operation */
+    TZ_VR_ERROR_INVALID_OPERATION = 3,
+
+    /* General error */
+    TZ_VR_ERROR_GENERAL = 4 + 0x1
+}_tzvr_engine_error_e;
+
+typedef _tzvr_engine_error_e tzvr_ret_type;
+typedef void *frame_buffer_handle;
+
+typedef size_t _tzvr_context_ptr; // Handle to hold pointer/address
+typedef _tzvr_context_ptr tzvr_context;
+#ifdef __cplusplus
+}
+#endif
+#endif /* __TZVR_TYPES_H__ */
+#endif /* TIZENVR_USE_DYNAMIC_LIBRARY */
+
 #include <dlfcn.h>
 #else
 #include <vr-engine/inc/Core/tzvr.h>
@@ -37,6 +125,7 @@
 
 #define VR_BUFFER_WIDTH 1024
 #define VR_BUFFER_HEIGHT 1024
+#define OVR_PORT 55000
 
 #define GL(x) { x; int err = ctx.GetError(); if(err) { DALI_LOG_ERROR( "GL_ERROR: [%d] '%s', %x\n", __LINE__, #x, (unsigned)err);fflush(stderr);fflush(stdout);} else { /*DALI_LOG_ERROR("GL Call: %s\n", #x); fflush(stdout);*/} }
 
@@ -263,7 +352,6 @@ void VrEngineTizenVR::SubmitFrame()
     currEyePose.y = 0.0f;
     currEyePose.z = 0.0f;
     currEyePose.w = 1.0f;
-    currEyePose.type = 1;
   }
 
   Dali::Matrix mat;
@@ -333,7 +421,7 @@ bool VrEngineTizenVR::Get( const int property, void* output, int )
         }
         else // read from the server, if connection enabled
         {
-          if( !mImpl->ovrEnabled && !ConnectToOVR( 5556 ) )
+          if( !mImpl->ovrEnabled && !ConnectToOVR( OVR_PORT ) )
           {
             //DALI_LOG_ERROR("OVR: cannot connect to the OVR server!\n");
             return false;
@@ -487,7 +575,7 @@ bool VrEngineTizenVR::ConnectToOVR( int port )
   // send ping to make sure server is up ( with port forwarding it's valid, that
   // connection will open even without server running ).
   char p;
-  send( mImpl->ovrSock, "p", 1, 0 );
+  send( mImpl->ovrSock, "p\n", 2, 0 );
   if( recv( mImpl->ovrSock, &p, 1, 0 ) != 1 )
   {
     shutdown( mImpl->ovrSock, SHUT_RDWR );

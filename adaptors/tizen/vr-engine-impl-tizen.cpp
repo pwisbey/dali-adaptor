@@ -53,7 +53,6 @@ typedef struct eyePose {
 	float x, y, z;
 	float w;	/* For quaternion */
 	double timestamp;
-	int type;
 }eyePose_s;
 
 typedef struct tzvr_submit_params {
@@ -68,16 +67,16 @@ typedef struct tzvr_submit_params {
 typedef enum
 {
     /* Successful */
-    TZ_VR_SUCCESS = TIZEN_ERROR_NONE,
+    TZ_VR_SUCCESS = 0,
     /* Out of memory */
-    TZ_VR_ERROR_OUT_OF_MEMORY = TIZEN_ERROR_OUT_OF_MEMORY,
+    TZ_VR_ERROR_OUT_OF_MEMORY = 1,
     /* Invalid parameter */
-    TZ_VR_ERROR_INVALID_PARAMETER = TIZEN_ERROR_INVALID_PARAMETER,
+    TZ_VR_ERROR_INVALID_PARAMETER = 2,
     /* Invalid operation */
-    TZ_VR_ERROR_INVALID_OPERATION = TIZEN_ERROR_INVALID_OPERATION,
+    TZ_VR_ERROR_INVALID_OPERATION = 3,
 
     /* General error */
-    TZ_VR_ERROR_GENERAL = TIZEN_ERROR_END_OF_COLLECTION + 0x1
+    TZ_VR_ERROR_GENERAL = 4 + 0x1
 }_tzvr_engine_error_e;
 
 typedef _tzvr_engine_error_e tzvr_ret_type;
@@ -317,7 +316,18 @@ void VrEngineTizenVR::SubmitFrame()
   tzvr_submit_params_s params;
   eyePose currEyePose;
   memset( &currEyePose, 0, sizeof(eyePose_s) );
-  TzVR_get_current_pose( mImpl->vrContext, &currEyePose );
+
+  if( TzVR_get_current_pose )
+  {
+    TzVR_get_current_pose( mImpl->vrContext, &currEyePose );
+  }
+  else
+  {
+    currEyePose.x = 0.0f;
+    currEyePose.y = 0.0f;
+    currEyePose.z = 0.0f;
+    currEyePose.w = 1.0f;
+  }
 
   Dali::Matrix mat;
   params.frame_index = mImpl->frameIndex;
