@@ -52,12 +52,15 @@ struct CommandLineOptions
 {
 public:
 
-    // TODOVR
+    /**
+     * @brief Templated struct to hold an options value, as well as its set state.
+     * This allows us to not duplicate default values in code, by only using the option value if set.
+     */
     template< typename T >
     struct Option
     {
-      T value;
-      bool set;
+      T value;     ///< The value the option will be set to (not initialized).
+      bool set;    ///< True if the option is set.
 
       Option()
       : set( false )
@@ -80,12 +83,13 @@ public:
 
 public: // Command line parsed values
 
-  Option<int> noVSyncOnRender;  ///< If 1, then the user does not want VSync on Render
-  Option<int> stageWidth;       ///< The width of the stage required.  0 if not set.
-  Option<int> stageHeight;      ///< The height of the stage required.   0 if not set.
-  Option<int> viewMode;         ///< Stereocopic 3D view mode (0 = MONO, 1 = STEREO_HORZ, 2 = STEREO_VERT, 3 = STEREO_INTERLACED)
-  Option<int> stereoBase;       ///< The distance in millimeters between left/right cameras
-  Option<std::string> stageDPI; ///< DPI stored as hxv, where h is horizontal DPI and v is vertical DPI
+  Option<int>         noVSyncOnRender; ///< If 1, then the user does not want VSync on Render
+  Option<int>         stageWidth;      ///< The width of the stage required.  0 if not set.
+  Option<int>         stageHeight;     ///< The height of the stage required.   0 if not set.
+  Option<int>         viewMode;        ///< Stereocopic 3D view mode (0 = MONO, 1 = STEREO_HORZ, 2 = STEREO_VERT, 3 = STEREO_INTERLACED)
+  Option<int>         stereoBase;      ///< The distance in millimeters between left/right cameras
+  Option<bool>        vrEnabled;       ///< True if in VR mode
+  Option<std::string> stageDPI;        ///< DPI stored as hxv, where h is horizontal DPI and v is vertical DPI
 
 };
 

@@ -187,7 +187,6 @@ void Application::OnInit()
 
   if( mCommandLineOptions->stereoBase.set )
   {
-    std::cout << "todor: setstereobase:" << mCommandLineOptions->stereoBase.value << std::endl;
     Internal::Adaptor::Adaptor::GetImplementation( *mAdaptor ).SetStereoBase( mCommandLineOptions->stereoBase.value );
   }
 
@@ -199,6 +198,11 @@ void Application::OnInit()
       viewMode = static_cast<ViewMode>( mCommandLineOptions->viewMode.value );
     }
     Internal::Adaptor::Adaptor::GetImplementation( *mAdaptor ).SetViewMode( viewMode );
+  }
+
+  if( mCommandLineOptions->vrEnabled.set )
+  {
+    Internal::Adaptor::Adaptor::GetImplementation( *mAdaptor ).SetViewMode( VR );
   }
 
   if( ! mStylesheet.empty() )
@@ -339,7 +343,6 @@ float Application::GetStereoBase() const
 {
   return Internal::Adaptor::Adaptor::GetImplementation( *mAdaptor ).GetStereoBase();
 }
-
 
 void Application::ReplaceWindow(PositionSize windowPosition, const std::string& name)
 {

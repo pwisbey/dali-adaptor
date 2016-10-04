@@ -823,6 +823,7 @@ float Adaptor::GetStereoBase() const
   return mCore->GetStereoBase();
 }
 
+
 } // namespace Adaptor
 
 } // namespace Internal
