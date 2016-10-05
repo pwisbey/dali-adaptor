@@ -179,6 +179,22 @@ public:
    */
   EGLSurface GetCurrentSurface() const;
 
+  /**
+   * todor MOVE TO CPP
+   */
+  void SetSurfacelessContext( bool enabled )
+  {
+    mSurfacelessContext = enabled;
+  }
+
+  /**
+   * todor
+   */
+  bool IsSurfacelessContext() const
+  {
+    return mSurfacelessContext;
+  }
+
 private:
 
   Vector<EGLint>       mContextAttribs;
@@ -199,6 +215,7 @@ private:
   bool                 mContextCurrent;
   bool                 mIsWindow;
   ColorDepth           mColorDepth;
+  bool                 mSurfacelessContext; ///<todor
 };
 
 } // namespace Adaptor

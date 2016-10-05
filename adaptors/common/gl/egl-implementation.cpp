@@ -27,6 +27,8 @@
 // INTERNAL INCLUDES
 #include <gl/gl-implementation.h>
 #include <gl/egl-debug.h>
+//todor
+#include <iostream>
 
 namespace Dali
 {
@@ -49,18 +51,19 @@ namespace Adaptor
 }
 
 EglImplementation::EglImplementation()
-  : mEglNativeDisplay(0),
-    mEglNativeWindow(0),
-    mCurrentEglNativePixmap(0),
-    mEglDisplay(0),
-    mEglConfig(0),
-    mEglContext(0),
-    mCurrentEglSurface(0),
-    mGlesInitialized(false),
-    mIsOwnSurface(true),
-    mContextCurrent(false),
-    mIsWindow(true),
-    mColorDepth(COLOR_DEPTH_24)
+  : mEglNativeDisplay( 0 ),
+    mEglNativeWindow( 0 ),
+    mCurrentEglNativePixmap( 0 ),
+    mEglDisplay( 0 ),
+    mEglConfig( 0 ),
+    mEglContext( 0 ),
+    mCurrentEglSurface( 0 ),
+    mGlesInitialized( false ),
+    mIsOwnSurface( true ),
+    mContextCurrent( false ),
+    mIsWindow( true ),
+    mColorDepth( COLOR_DEPTH_24 ),
+    mSurfacelessContext( false )
 {
 }
 
@@ -71,6 +74,7 @@ EglImplementation::~EglImplementation()
 
 bool EglImplementation::InitializeGles( EGLNativeDisplayType display, bool isOwnSurface )
 {
+  std::cout << "todor: ################################# InitializeGles" << std::endl;
   if ( !mGlesInitialized )
   {
     mEglNativeDisplay = display;
@@ -124,6 +128,7 @@ bool EglImplementation::InitializeGles( EGLNativeDisplayType display, bool isOwn
 
 bool EglImplementation::CreateContext()
 {
+  std::cout << "todor: ################################# CreateContext" << std::endl;
   // make sure a context isn't created twice
   DALI_ASSERT_ALWAYS( (mEglContext == 0) && "EGL context recreated" );
 
@@ -143,6 +148,7 @@ bool EglImplementation::CreateContext()
 
 void EglImplementation::DestroyContext()
 {
+  std::cout << "todor: ################################# DestroyContext" << std::endl;
   DALI_ASSERT_ALWAYS( mEglContext && "no EGL context" );
 
   eglDestroyContext( mEglDisplay, mEglContext );
@@ -151,6 +157,7 @@ void EglImplementation::DestroyContext()
 
 void EglImplementation::DestroySurface()
 {
+  std::cout << "todor: ################################# DestroySurface" << std::endl;
   if(mIsOwnSurface && mCurrentEglSurface)
   {
     eglDestroySurface( mEglDisplay, mCurrentEglSurface );
@@ -160,13 +167,21 @@ void EglImplementation::DestroySurface()
 
 void EglImplementation::MakeContextCurrent()
 {
+  std::cout << "todor: ################################# MakeContextCurrent" << std::endl;
   mContextCurrent = true;
 
-  if(mIsOwnSurface)
+  if( mIsOwnSurface )
   {
-    //TODOVR
-    //eglMakeCurrent( mEglDisplay, mCurrentEglSurface, mCurrentEglSurface, mEglContext );   // Normal
-    eglMakeCurrent( mEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, mEglContext );           // VR
+    if( mSurfacelessContext || !mCurrentEglSurface )
+    {
+      std::cout << "todor: .................... VR1: MCC" << std::endl;
+      eglMakeCurrent( mEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, mEglContext );
+    }
+    else
+    {
+      std::cout << "todor: .................... NM1: MCC" << std::endl;
+      eglMakeCurrent( mEglDisplay, mCurrentEglSurface, mCurrentEglSurface, mEglContext );
+    }
   }
 
   EGLint error = eglGetError();
@@ -192,12 +207,23 @@ void EglImplementation::MakeContextCurrent()
 
 void EglImplementation::MakeCurrent( EGLNativePixmapType pixmap, EGLSurface eglSurface )
 {
+  std::cout << "todor: ################################# MakeCurrent" << std::endl;
   mCurrentEglNativePixmap = pixmap;
   mCurrentEglSurface = eglSurface;
 
-  if(mIsOwnSurface)
+  if( mIsOwnSurface )
   {
-    eglMakeCurrent( mEglDisplay, mCurrentEglSurface, mCurrentEglSurface, mEglContext );
+    if( mSurfacelessContext || !mCurrentEglSurface )
+    {
+      std::cout << "todor: .................... VR2: MCC" << std::endl;
+      eglMakeCurrent( mEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, mEglContext );
+    }
+    else
+    {
+      std::cout << "todor: .................... NM2: MCC" << std::endl;
+      eglMakeCurrent( mEglDisplay, mCurrentEglSurface, mCurrentEglSurface, mEglContext );
+    }
+    //todor eglMakeCurrent( mEglDisplay, mCurrentEglSurface, mCurrentEglSurface, mEglContext );
   }
 
   EGLint error = eglGetError();
@@ -212,6 +238,7 @@ void EglImplementation::MakeCurrent( EGLNativePixmapType pixmap, EGLSurface eglS
 
 void EglImplementation::MakeContextNull()
 {
+  std::cout << "todor: ################################# MakeContextNull" << std::endl;
   mContextCurrent = false;
   // clear the current context
   eglMakeCurrent( mEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT );
@@ -219,6 +246,7 @@ void EglImplementation::MakeContextNull()
 
 void EglImplementation::TerminateGles()
 {
+  std::cout << "todor: ################################# TerminateGles" << std::endl;
   if ( mGlesInitialized )
   {
     // in latest Mali DDK (r2p3 ~ r3p0 in April, 2012),
@@ -245,26 +273,31 @@ void EglImplementation::TerminateGles()
 
 bool EglImplementation::IsGlesInitialized() const
 {
+  std::cout << "todor: ################################# IsGlesInitialized" << std::endl;
   return mGlesInitialized;
 }
 
 void EglImplementation::SwapBuffers()
 {
+  std::cout << "todor: ################################# SwapBuffers" << std::endl;
   eglSwapBuffers( mEglDisplay, mCurrentEglSurface );
 }
 
 void EglImplementation::CopyBuffers()
 {
+  std::cout << "todor: ################################# CopyBuffers" << std::endl;
   eglCopyBuffers( mEglDisplay, mCurrentEglSurface, mCurrentEglNativePixmap );
 }
 
 void EglImplementation::WaitGL()
 {
+  std::cout << "todor: ################################# WaitGL" << std::endl;
   eglWaitGL();
 }
 
 void EglImplementation::ChooseConfig( bool isWindowType, ColorDepth depth )
 {
+  std::cout << "todor: ################################# ChooseConfig" << std::endl;
   if(mEglConfig && isWindowType == mIsWindow && mColorDepth == depth)
   {
     return;
@@ -384,6 +417,7 @@ void EglImplementation::ChooseConfig( bool isWindowType, ColorDepth depth )
 
 void EglImplementation::CreateSurfaceWindow( EGLNativeWindowType window, ColorDepth depth )
 {
+  std::cout << "todor: ################################# CreateSurfaceWindow" << std::endl;
   DALI_ASSERT_ALWAYS( ( mCurrentEglSurface == 0 ) && "EGL surface already exists" );
 
   mEglNativeWindow = window;
@@ -401,6 +435,7 @@ void EglImplementation::CreateSurfaceWindow( EGLNativeWindowType window, ColorDe
 
 EGLSurface EglImplementation::CreateSurfacePixmap( EGLNativePixmapType pixmap, ColorDepth depth )
 {
+  std::cout << "todor: ################################# CreateSurfacePixmap" << std::endl;
   mCurrentEglNativePixmap = pixmap;
   mColorDepth = depth;
   mIsWindow = false;
@@ -418,6 +453,7 @@ EGLSurface EglImplementation::CreateSurfacePixmap( EGLNativePixmapType pixmap, C
 
 bool EglImplementation::ReplaceSurfaceWindow( EGLNativeWindowType window )
 {
+  std::cout << "todor: ################################# ReplaceSurfaceWindow" << std::endl;
   bool contextLost = false;
 
   // display connection has not changed, then we can just create a new surface
@@ -438,6 +474,7 @@ bool EglImplementation::ReplaceSurfaceWindow( EGLNativeWindowType window )
 
 bool EglImplementation::ReplaceSurfacePixmap( EGLNativePixmapType pixmap, EGLSurface& eglSurface )
 {
+  std::cout << "todor: ################################# ReplaceSurfacePixmap" << std::endl;
   bool contextLost = false;
 
   // display connection has not changed, then we can just create a new surface

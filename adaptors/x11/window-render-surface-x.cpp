@@ -35,6 +35,8 @@
 #include <trigger-event.h>
 #include <gl/egl-implementation.h>
 #include <base/display-connection.h>
+//todor
+#include <iostream>
 
 namespace Dali
 {
@@ -190,9 +192,17 @@ bool WindowRenderSurface::PreRender( EglInterface&, Integration::GlAbstraction& 
 
 void WindowRenderSurface::PostRender( EglInterface& egl, Integration::GlAbstraction& glAbstraction, DisplayConnection* displayConnection, bool replacingSurface )
 {
-  // TODOVR: should not happen if using front buffer rendering or VR engine that swaps buffers ( if using surfaceless context )
-  //Internal::Adaptor::EglImplementation& eglImpl = static_cast<Internal::Adaptor::EglImplementation&>( egl );
-  //eglImpl.SwapBuffers();
+  Internal::Adaptor::EglImplementation& eglImpl = static_cast<Internal::Adaptor::EglImplementation&>( egl );
+  if( !eglImpl.IsSurfacelessContext() )
+  {
+    std::cout << "todor: .................... NM: PostRender" << std::endl;
+    eglImpl.SwapBuffers();
+  }
+  else
+  {
+    //todor del if branch
+    std::cout << "todor: .................... VR: PostRender" << std::endl;
+  }
 
   // When the window is deiconified, it approves the deiconify operation to window manager after rendering
   if(mNeedToApproveDeiconify)

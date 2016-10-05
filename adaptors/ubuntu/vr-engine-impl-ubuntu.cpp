@@ -1,13 +1,16 @@
+//todor licence
+
 // CLASS HEADER
 #define TIZENVR_USE_DYNAMIC_LIBRARY
 
 #include "vr-engine-impl-ubuntu.h"
 #define GL_DEPTH_COMPONENT24              0x81A6
+
 #ifdef TIZENVR_USE_DYNAMIC_LIBRARY
-#define GL_DEPTH_COMPONENT24              0x81A6
-#ifdef TIZENVR_USE_DYNAMIC_LIBRARY
+
+//todor do we need this?
 //#include "vr-engine/inc/Core/tzvr_types.h"
-// tzvr types inlined for now
+
 #ifndef __TZVR_TYPES_H__
 #define __TZVR_TYPES_H__
 //#include <tizen.h>
@@ -91,14 +94,14 @@ typedef _tzvr_context_ptr tzvr_context;
 }
 #endif
 #endif /* __TZVR_TYPES_H__ */
-#endif /* TIZENVR_USE_DYNAMIC_LIBRARY */
+//todor del #endif /* TIZENVR_USE_DYNAMIC_LIBRARY */
 
 #include <dlfcn.h>
 #else
 #include <vr-engine/inc/Core/tzvr.h>
 #endif // TIZENVR_USE_DYNAMIC_LIBRARY
 
-// needed if want to use GearVR server
+// For GearVR server.
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <string.h>
@@ -122,6 +125,8 @@ typedef _tzvr_context_ptr tzvr_context;
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+//todor
+#include <iostream>
 
 #define VR_BUFFER_WIDTH 1024
 #define VR_BUFFER_HEIGHT 1024
@@ -294,8 +299,9 @@ VrEngineTizenVR::~VrEngineTizenVR()
 
 }
 
-bool VrEngineTizenVR::Initialize( VrEngineInitParams* initParams  )
+bool VrEngineTizenVR::Initialize( VrEngineInitializeParams* initParams  )
 {
+  std::cout << "todor: ----------------------- VrEngineTizenVR::Initialize" << std::endl;
   mImpl->screenWidth = initParams->screenWidth;
   mImpl->screenHeight = initParams->screenHeight;
   DALI_ASSERT_ALWAYS( TZ_VR_SUCCESS == TzVR_init( mImpl->screenWidth, mImpl->screenHeight, &mImpl->vrContext ) );
@@ -307,19 +313,35 @@ bool VrEngineTizenVR::Initialize( VrEngineInitParams* initParams  )
   return SetupVREngine( initParams );
 }
 
+void VrEngineTizenVR::SetEnabled( bool enable )
+{
+  EglFactory* eglFactory = static_cast<EglFactory*>( &mAdaptorInternalServices.GetEGLFactoryInterface() );
+  if( !eglFactory )
+  {
+    DALI_LOG_ERROR( "Can't todor" );
+    return;
+  }
+  EglImplementation* eglImplementation = static_cast<EglImplementation*>( eglFactory->GetImplementation() );
+  eglImplementation->SetSurfacelessContext( enable );
+}
+
 void VrEngineTizenVR::Start()
 {
+  std::cout << "todor: ----------------------- VrEngineTizenVR::Start" << std::endl;
   // this function must run on GL thread
   EglFactory* eglFactory = static_cast<EglFactory*>( &mAdaptorInternalServices.GetEGLFactoryInterface() );
   if( !eglFactory )
   {
-    DALI_LOG_ERROR("Can't initialise VR Engine!");
+    DALI_LOG_ERROR( "Can't initialise VR Engine" );
+    return;
   }
-  EglImplementation* eglImpl = static_cast<EglImplementation*>( eglFactory->GetImplementation() );
 
-  EGLContext ctx = eglImpl->GetContext();
+  EglImplementation* eglImplementation = static_cast<EglImplementation*>( eglFactory->GetImplementation() );
+  //todor eglImplementation->SetSurfacelessContext( true );
+
+  EGLContext context = eglImplementation->GetContext();
   // start TzVR engine
-  TzVR_start_engine( mImpl->vrContext, eglImpl->GetDisplay(), ctx, eglImpl->GetCurrentSurface() );
+  TzVR_start_engine( mImpl->vrContext, eglImplementation->GetDisplay(), context, eglImplementation->GetCurrentSurface() );
 }
 
 void VrEngineTizenVR::Stop()
@@ -588,7 +610,7 @@ bool VrEngineTizenVR::ConnectToOVR( int port )
   return true;
 }
 
-bool VrEngineTizenVR::SetupVREngine( VrEngineInitParams* params )
+bool VrEngineTizenVR::SetupVREngine( VrEngineInitializeParams* params )
 {
   GlImplementation* gl = static_cast<GlImplementation*>( &mAdaptorInternalServices.GetGlesInterface() );
   if( !gl )
