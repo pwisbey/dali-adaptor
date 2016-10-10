@@ -24,6 +24,8 @@
 // INTERNAL INCLUDES
 #include <base/interfaces/adaptor-internal-services.h>
 #include <base/display-connection.h>
+//todor
+#include <iostream>
 
 namespace Dali
 {

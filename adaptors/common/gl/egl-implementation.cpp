@@ -39,6 +39,16 @@ namespace Internal
 namespace Adaptor
 {
 
+namespace
+{
+
+// If building for VR, we default to a surfaceless context.
+#ifdef TIZENVR_ENABLED
+const bool DEFAULT_SURFACELESS_CONTEXT = true;
+#else
+const bool DEFAULT_SURFACELESS_CONTEXT = false;
+#endif
+
 #define TEST_EGL_ERROR(lastCommand) \
 { \
   EGLint err = eglGetError(); \
@@ -49,6 +59,8 @@ namespace Adaptor
     DALI_ASSERT_ALWAYS(0 && "EGL error"); \
   } \
 }
+
+} // Anonymous namespace
 
 EglImplementation::EglImplementation()
   : mEglNativeDisplay( 0 ),
@@ -63,8 +75,9 @@ EglImplementation::EglImplementation()
     mContextCurrent( false ),
     mIsWindow( true ),
     mColorDepth( COLOR_DEPTH_24 ),
-    mSurfacelessContext( false )
+    mSurfacelessContext( DEFAULT_SURFACELESS_CONTEXT )
 {
+  std::cout << "todor: ################################# EglImplementation::EglImplementation()" << std::endl;
 }
 
 EglImplementation::~EglImplementation()
@@ -167,7 +180,7 @@ void EglImplementation::DestroySurface()
 
 void EglImplementation::MakeContextCurrent()
 {
-  std::cout << "todor: ################################# MakeContextCurrent" << std::endl;
+  std::cout << "todor: ################################# MakeContextCurrent - NEED VR" << std::endl;
   mContextCurrent = true;
 
   if( mIsOwnSurface )
@@ -207,7 +220,7 @@ void EglImplementation::MakeContextCurrent()
 
 void EglImplementation::MakeCurrent( EGLNativePixmapType pixmap, EGLSurface eglSurface )
 {
-  std::cout << "todor: ################################# MakeCurrent" << std::endl;
+  std::cout << "todor: ################################# MakeCurrent - NEED VR" << std::endl;
   mCurrentEglNativePixmap = pixmap;
   mCurrentEglSurface = eglSurface;
 

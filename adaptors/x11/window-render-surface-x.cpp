@@ -195,13 +195,13 @@ void WindowRenderSurface::PostRender( EglInterface& egl, Integration::GlAbstract
   Internal::Adaptor::EglImplementation& eglImpl = static_cast<Internal::Adaptor::EglImplementation&>( egl );
   if( !eglImpl.IsSurfacelessContext() )
   {
-    std::cout << "todor: .................... NM: PostRender" << std::endl;
+    //std::cout << "todor: .................... NM: PostRender" << std::endl;
     eglImpl.SwapBuffers();
   }
   else
   {
     //todor del if branch
-    std::cout << "todor: .................... VR: PostRender" << std::endl;
+    //std::cout << "todor: .................... VR: PostRender" << std::endl;
   }
 
   // When the window is deiconified, it approves the deiconify operation to window manager after rendering
@@ -233,6 +233,7 @@ void WindowRenderSurface::PostRender( EglInterface& egl, Integration::GlAbstract
 
     mNeedToApproveDeiconify = false;
   }
+  //todor std::cout << "todor: .................... VR: PostRender: DONE" << std::endl;
 }
 
 void WindowRenderSurface::StopRender()
