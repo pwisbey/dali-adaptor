@@ -180,20 +180,9 @@ public:
   EGLSurface GetCurrentSurface() const;
 
   /**
-   * todor MOVE TO CPP
-   */
-  void SetSurfacelessContext( bool enabled )
-  {
-    mSurfacelessContext = enabled;
-  }
-
-  /**
    * todor
    */
-  bool IsSurfacelessContext() const
-  {
-    return mSurfacelessContext;
-  }
+  bool IsSurfacelessContext() const;
 
 private:
 

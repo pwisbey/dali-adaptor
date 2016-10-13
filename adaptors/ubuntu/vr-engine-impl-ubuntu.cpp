@@ -1,6 +1,4 @@
 //todor licence
-//todor remove def
-#define TIZENVR_USE_DYNAMIC_LIBRARY
 
 // CLASS HEADER
 #include "vr-engine-impl-ubuntu.h"
@@ -120,7 +118,7 @@ void VrEngineTizenVR::SubmitFrame()
   ++mTizenVrData->frameIndex;
 }
 
-bool VrEngineTizenVR::GetCurrentEyePose( VrEngineEyePose* eyePose )
+bool VrEngineTizenVR::GetCurrentEyePose( Dali::Integration::Vr::VrEngineEyePose* eyePose )
 {
   eyePose_s tzvrPose;
 

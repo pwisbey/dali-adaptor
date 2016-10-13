@@ -515,6 +515,11 @@ EGLSurface EglImplementation::GetCurrentSurface() const
   return mCurrentEglSurface;
 }
 
+bool EglImplementation::IsSurfacelessContext() const
+{
+  return mSurfacelessContext;
+}
+
 
 } // namespace Adaptor
 

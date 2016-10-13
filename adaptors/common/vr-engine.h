@@ -7,16 +7,15 @@
 #define TIZENVR_USE_DYNAMIC_LIBRARY
 
 // CLASS HEADER
-#include <dali/integration-api/vr-engine.h>
+#include "dali/integration-api/vr-engine.h"
 
 // EXTERNAL INCLUDES
-#include <base/interfaces/adaptor-internal-services.h>
+#include <dali/integration-api/vr-defaults.h>
+
+// INTERNAL INCLUDES
 #include <adaptors/common/gl/egl-implementation.h>
 #include <adaptors/common/tizen-vr-platform-header.h>
-
-//todor remove
-#define VR_BUFFER_WIDTH  1024
-#define VR_BUFFER_HEIGHT 1024
+#include <base/interfaces/adaptor-internal-services.h>
 
 namespace Dali
 {
@@ -44,34 +43,30 @@ public:
    */
   virtual ~VrEngine();
 
-  /**
-   * @brief todor
-   */
-  EglImplementation* GetEglImplementation();
-
 
   // Methods that must be defined by the deriving class:
 
   /**
-   * @brief todor putback
+   * @brief todor
    */
   virtual bool GetCurrentEyePose( Dali::Integration::Vr::VrEngineEyePose* eyePose ) = 0;
 
 public:
 
+  // Optional virtual methods (definitions exist in this module by default):
+
+  //todor doxy
   virtual bool Initialize( Dali::Integration::Vr::VrEngineInitializeParams* initializeParams );
-  virtual void SetEnabled( bool enable );
-  virtual void Start();
   virtual bool SetupVREngine( Dali::Integration::Vr::VrEngineInitializeParams* initializeParams );
   virtual bool CreateFramebufferTexture( GlImplementation& context, int frameBufferObject, int colorTexture, int depthTexture );
   virtual bool Get( const int property, void* output, int );
   virtual bool Set( const int property, const void* input, int count );
+  virtual void Start();
   virtual void Stop();
   virtual void PreRender();
   virtual void PostRender();
 
-  // todor: can this be prot?
-public:
+protected:
 
   // todor TZVR API type definitions
 #ifdef TIZENVR_USE_DYNAMIC_LIBRARY
@@ -89,7 +84,10 @@ public:
   typedef tzvr_ret_type (*TZVRRECENTERPOSEPROC)     (tzvr_context);
 #endif
 
-protected:
+  /**
+   * @brief todor
+   */
+  EglImplementation* GetEglImplementation();
 
   struct TizenVrData
   {
@@ -101,8 +99,8 @@ protected:
       frameBufferDepth( 0 ),
       eyeBuffers( NULL ),
       eyeBufferCount( 0 ),
-      frameBufferWidth( 1024 ), //todor
-      frameBufferHeight( 1024 ),
+      frameBufferWidth( Dali::Integration::Vr::DEFAULT_VR_VIEWPORT_DIMENSIONS.width ),
+      frameBufferHeight( Dali::Integration::Vr::DEFAULT_VR_VIEWPORT_DIMENSIONS.height ),
       tzvrFramebufferHandle( 0 ),
       frameIndex( 0 )
 #ifdef TIZENVR_USE_DYNAMIC_LIBRARY
@@ -117,7 +115,7 @@ protected:
     int           screenHeight;
     int           frameBufferDepth;
 
-    // One per eye
+    // An EyeBuffer is allocated for each eye. Each contain 2 sets of buffers.
     struct EyeBuffer
     {
       int         frameBufferObjects[2];
@@ -155,7 +153,7 @@ protected:
 
     AdaptorInternalServices& mAdaptorInternalServices; ///< todor
     TizenVrData* mTizenVrData;                         ///< todor
-    bool mEnabled; ///< todor
+    bool mEnabled:1;                                   ///< todor
 
 };
 

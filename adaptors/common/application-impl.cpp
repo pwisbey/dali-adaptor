@@ -200,11 +200,6 @@ void Application::OnInit()
     Internal::Adaptor::Adaptor::GetImplementation( *mAdaptor ).SetViewMode( viewMode );
   }
 
-  if( mCommandLineOptions->vrEnabled.set )
-  {
-    Internal::Adaptor::Adaptor::GetImplementation( *mAdaptor ).SetViewMode( VR );
-  }
-
   if( ! mStylesheet.empty() )
   {
     Dali::StyleMonitor::Get().SetTheme( mStylesheet );

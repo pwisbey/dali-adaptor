@@ -1,8 +1,5 @@
 //todor licence + doxy
 
-//todor
-#define TIZENVR_USE_DYNAMIC_LIBRARY
-
 // CLASS HEADER
 #include "vr-engine.h"
 
@@ -13,19 +10,7 @@
 
 // INTERNAL INCLUDES
 #include <adaptors/common/gl/egl-factory.h>
-
-//todor tmp
-// INTERNAL INCLUDES
-#include <adaptors/common/gl/egl-implementation.h>
-#include <adaptors/common/gl/egl-factory.h>
-#include <adaptors/common/gl/egl-implementation.h>
 #include <adaptors/common/gl/gl-implementation.h>
-// EXTERNAL INCLUDES
-#include <dali/integration-api/debug.h>
-#include <dali/public-api/math/matrix.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
 
 namespace Dali
 {
@@ -56,6 +41,7 @@ VrEngine::VrEngine( AdaptorInternalServices& internalServices )
   std::cout << "todor: ...................................... VrEngine::Initialize" << std::endl;
   mTizenVrData = new TizenVrData();
 
+  // There is currently no TizenVr Engine development library. We work around this by using dlopen to get access to methods at run-time.
 #ifdef TIZENVR_USE_DYNAMIC_LIBRARY
   std::cout << "todor: tzvr: getting FUNCS" << std::endl;
   mTizenVrData->vrEngineLib = dlopen( "libvrengine.so", RTLD_NOW | RTLD_GLOBAL );
@@ -96,7 +82,7 @@ VrEngine::VrEngine( AdaptorInternalServices& internalServices )
 
   for( int i = 0; i < 12; ++i )
   {
-    (*(void**)FUNCTION_PTRS[i]) = dlsym( mTizenVrData->vrEngineLib, FUNCTION_NAMES[i] );
+    ( *(void**)FUNCTION_PTRS[i] ) = dlsym( mTizenVrData->vrEngineLib, FUNCTION_NAMES[i] );
     if( !(*(void**)FUNCTION_PTRS[i]) )
     {
       DALI_LOG_ERROR( "Can't bind function: %s\n", FUNCTION_NAMES[i] );
@@ -111,6 +97,7 @@ VrEngine::~VrEngine()
   {
     delete [] mTizenVrData->eyeBuffers;
     delete mTizenVrData;
+    mTizenVrData = NULL;
   }
 }
 
@@ -126,7 +113,7 @@ bool VrEngine::Initialize( Dali::Integration::Vr::VrEngineInitializeParams* init
   mTizenVrData->eyeBufferCount = mTizenVrData->frameBufferDepth;
 
   // Setup GL objects.
-  return SetupVREngine( initializeParams ); // todor combine funcs
+  return SetupVREngine( initializeParams );
 }
 
 EglImplementation* VrEngine::GetEglImplementation()
@@ -140,16 +127,6 @@ EglImplementation* VrEngine::GetEglImplementation()
   }
 
   return eglImplementation;
-}
-
-//todor vr delete
-void VrEngine::SetEnabled( bool enable )
-{
-  EglImplementation* eglImplementation = GetEglImplementation();
-  if( eglImplementation )
-  {
-    eglImplementation->SetSurfacelessContext( enable );
-  }
 }
 
 void VrEngine::Start()
@@ -182,15 +159,15 @@ bool VrEngine::SetupVREngine( Dali::Integration::Vr::VrEngineInitializeParams* i
   context.GenFramebuffers( totalBufferCount, frameBufferObjects );
   context.GenTextures( totalBufferCount, depthTextures );
 
-  // If necessary overwrite frame buffer object sizes.
-  mTizenVrData->frameBufferWidth = VR_BUFFER_WIDTH;//initializeParams->viewportWidth;//todorscnow
-  mTizenVrData->frameBufferHeight = VR_BUFFER_HEIGHT;// initializeParams->viewportHeight;
+  // Frame buffer object sizes.
+  mTizenVrData->frameBufferWidth = Dali::Integration::Vr::DEFAULT_VR_VIEWPORT_DIMENSIONS.width;
+  mTizenVrData->frameBufferHeight = Dali::Integration::Vr::DEFAULT_VR_VIEWPORT_DIMENSIONS.height;
 
-  // Loop to set up each eye.
+  // Loop to set up all buffers per eye.
   Dali::Integration::Vr::VrEngineRenderTargetInfo renderTargetInfo[mTizenVrData->eyeBufferCount];
   for( int i = 0; i < mTizenVrData->eyeBufferCount; ++i )
   {
-    // Iterate for each of the two buffers per eye.
+    // Loop for each eye.
     for( int k = 0; k < 2; ++k )
     {
       // Set up render target information.
@@ -200,7 +177,7 @@ bool VrEngine::SetupVREngine( Dali::Integration::Vr::VrEngineInitializeParams* i
 
       // Generate depth buffers.
       context.BindTexture( GL_TEXTURE_2D, renderTargetInfo[i].depthTextures[k] );
-      context.TexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, VR_BUFFER_WIDTH, VR_BUFFER_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, 0 );
+      context.TexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, mTizenVrData->frameBufferWidth, mTizenVrData->frameBufferHeight, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, 0 );
       context.TexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
       context.TexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
     }
@@ -209,7 +186,7 @@ bool VrEngine::SetupVREngine( Dali::Integration::Vr::VrEngineInitializeParams* i
   // Attach render targets.
   Set( VrProperty::EYE_RENDER_TARGETS, renderTargetInfo, mTizenVrData->eyeBufferCount );
 
-  // Attach textures to the fbos.
+  // Attach textures to the frame buffer objects.
   int leftTexture( 0 );
   int rightTexture( 0 );
   for( int i = 0; i < mTizenVrData->eyeBufferCount; ++i )
@@ -271,6 +248,7 @@ bool VrEngine::CreateFramebufferTexture( GlImplementation& context, int frameBuf
   return false;
 }
 
+//todor do something with 3rd param?
 bool VrEngine::Get( const int property, void* output, int )
 {
   switch( property )
@@ -380,13 +358,10 @@ bool VrEngine::Set( const int property, const void* input, int count )
         mTizenVrData->eyeBuffers[i].frameBufferObjects[0] = renderTarget->frameBufferObjects[0];
         mTizenVrData->eyeBuffers[i].frameBufferObjects[1] = renderTarget->frameBufferObjects[1];
 
-        // Color textures.
-        // Check state for color texture.
-        int leftColor = renderTarget->colorTextures[0];
-        int rightColor = renderTarget->colorTextures[1];
-        if( leftColor != 0 || rightColor != 0 )
+        // Check state of color textures.
+        if( renderTarget->colorTextures[0] != 0 || renderTarget->colorTextures[1] != 0 )
         {
-          DALI_ASSERT_ALWAYS( "Color textures ID are reserved\n" );
+          DALI_ASSERT_ALWAYS( "Color texture IDs are reserved\n" );
         }
 
         if( !mTizenVrData->tzvrFramebufferHandle )
@@ -402,12 +377,6 @@ bool VrEngine::Set( const int property, const void* input, int count )
         mTizenVrData->eyeBuffers[i].depthTextures[0] = renderTarget->depthTextures[0];
         mTizenVrData->eyeBuffers[i].depthTextures[1] = renderTarget->depthTextures[1];
       }
-      break;
-    }
-
-    case VrProperty::EYE_BUFFER_COUNT:
-    {
-      DALI_LOG_ERROR( "EYE_BUFFER_COUNT is not settable\n" );
       break;
     }
 
@@ -434,7 +403,6 @@ bool VrEngine::Set( const int property, const void* input, int count )
 
 void VrEngine::Stop()
 {
-  SetEnabled( false );
 }
 
 void VrEngine::PreRender()
