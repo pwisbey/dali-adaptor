@@ -1,8 +1,8 @@
-#ifndef __DALI_INTERNAL_COMMAND_LINE_OPTIONS_H__
-#define __DALI_INTERNAL_COMMAND_LINE_OPTIONS_H__
+#ifndef DALI_INTERNAL_COMMAND_LINE_OPTIONS_H
+#define DALI_INTERNAL_COMMAND_LINE_OPTIONS_H
 
 /*
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2016 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,7 +88,6 @@ public: // Command line parsed values
   Option<int>         stageHeight;     ///< The height of the stage required.   0 if not set.
   Option<int>         viewMode;        ///< Stereocopic 3D view mode (0 = MONO, 1 = STEREO_HORZ, 2 = STEREO_VERT, 3 = STEREO_INTERLACED)
   Option<int>         stereoBase;      ///< The distance in millimeters between left/right cameras
-  Option<bool>        vrEnabled;       ///< True if in VR mode
   Option<std::string> stageDPI;        ///< DPI stored as hxv, where h is horizontal DPI and v is vertical DPI
 
 };
@@ -99,4 +98,4 @@ public: // Command line parsed values
 
 } // namespace Dali
 
-#endif // __DALI_INTERNAL_COMMAND_LINE_OPTIONS_H__
+#endif // DALI_INTERNAL_COMMAND_LINE_OPTIONS_H

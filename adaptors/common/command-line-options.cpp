@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2016 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,6 @@ enum Option
   OPTION_DPI,
   OPTION_STEREO_MODE,
   OPTION_STEREO_BASE,
-  OPTION_VR_ENABLED,
   OPTION_HELP
 };
 
@@ -117,7 +116,6 @@ CommandLineOptions::CommandLineOptions( int *argc, char **argv[] )
       { EXPECTED_ARGS[OPTION_DPI].opt,          required_argument, NULL,                   'd' },  // "--dpi"
       { EXPECTED_ARGS[OPTION_STEREO_MODE].opt,  required_argument, NULL,                   'v' },  // "--view"
       { EXPECTED_ARGS[OPTION_STEREO_BASE].opt,  required_argument, NULL,                   's' },  // "--stereo-base"
-      { EXPECTED_ARGS[OPTION_VR_ENABLED].opt,   no_argument,       NULL,                   'r' },  // "--vr"
       { EXPECTED_ARGS[OPTION_HELP].opt,         no_argument,       &help,                  '?' },  // "--help"
       { 0, 0, 0, 0 } // end of options
     };
@@ -199,14 +197,6 @@ CommandLineOptions::CommandLineOptions( int *argc, char **argv[] )
             stereoBase.set = true;
             optionProcessed = true;
           }
-          break;
-        }
-
-        case 'r':
-        {
-          vrEnabled.value = true;
-          vrEnabled.set = true;
-          optionProcessed = true;
           break;
         }
 

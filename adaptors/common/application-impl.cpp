@@ -28,7 +28,6 @@
 #include <common/framework.h>
 #include <singleton-service-impl.h>
 #include <lifecycle-controller-impl.h>
-#include <iostream> //TODOVR
 
 namespace Dali
 {
