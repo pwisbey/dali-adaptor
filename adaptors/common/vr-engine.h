@@ -1,5 +1,4 @@
 //todor licence + doxy
-
 #ifndef DALI_INTERNAL_ADAPTOR_VR_ENGINE_H
 #define DALI_INTERNAL_ADAPTOR_VR_ENGINE_H
 
@@ -56,15 +55,19 @@ public:
   // Optional virtual methods (definitions exist in this module by default):
 
   //todor doxy
-  virtual bool Initialize( Dali::Integration::Vr::VrEngineInitializeParams* initializeParams );
-  virtual bool SetupVREngine( Dali::Integration::Vr::VrEngineInitializeParams* initializeParams );
-  virtual bool CreateFramebufferTexture( GlImplementation& context, int frameBufferObject, int colorTexture, int depthTexture );
-  virtual bool Get( const int property, void* output, int );
-  virtual bool Set( const int property, const void* input, int count );
-  virtual void Start();
-  virtual void Stop();
-  virtual void PreRender();
-  virtual void PostRender();
+  bool Initialize( unsigned int screenWidth, unsigned int screenHeight );
+
+private:
+
+  bool SetupVREngine();
+  void SetEyeRenderTargets( const Dali::Integration::Vr::VrEngineRenderTargetInfo* renderTargets );
+  bool CreateFramebufferTexture( GlImplementation& context, int frameBufferObject, int colorTexture, int depthTexture );
+  bool Get( const int property, void* output );
+  void GetEyeBufferInfo( EyeBufferInfo& eyeBufferInfo );
+  void Start();
+  void Stop();
+  void PreRender();
+  void PostRender();
 
 protected:
 
@@ -124,7 +127,7 @@ protected:
     };
 
     EyeBuffer*    eyeBuffers;
-    int           eyeBufferCount;
+    unsigned int  eyeBufferCount;
     int           frameBufferWidth;
     int           frameBufferHeight;
     frame_buffer_handle tzvrFramebufferHandle; // For automatically created texture buffers

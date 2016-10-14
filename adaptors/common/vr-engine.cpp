@@ -5,12 +5,11 @@
 
 // EXTERNAL INCLUDES
 #include <dali/integration-api/debug.h>
-//todor
-#include <iostream>
 
 // INTERNAL INCLUDES
 #include <adaptors/common/gl/egl-factory.h>
 #include <adaptors/common/gl/gl-implementation.h>
+
 
 namespace Dali
 {
@@ -31,6 +30,8 @@ const bool DEFAULT_VR_ENABLED_STATE = true;
 const bool DEFAULT_VR_ENABLED_STATE = false;
 #endif
 
+const unsigned int EYE_COUNT = 2;
+
 } // Anonymous namespace
 
 VrEngine::VrEngine( AdaptorInternalServices& internalServices )
@@ -38,12 +39,10 @@ VrEngine::VrEngine( AdaptorInternalServices& internalServices )
   mTizenVrData( NULL ),
   mEnabled( DEFAULT_VR_ENABLED_STATE )
 {
-  std::cout << "todor: ...................................... VrEngine::Initialize" << std::endl;
   mTizenVrData = new TizenVrData();
 
   // There is currently no TizenVr Engine development library. We work around this by using dlopen to get access to methods at run-time.
 #ifdef TIZENVR_USE_DYNAMIC_LIBRARY
-  std::cout << "todor: tzvr: getting FUNCS" << std::endl;
   mTizenVrData->vrEngineLib = dlopen( "libvrengine.so", RTLD_NOW | RTLD_GLOBAL );
   DALI_ASSERT_ALWAYS( mTizenVrData->vrEngineLib && "Can't load libvrengine.so library" );
 
@@ -65,16 +64,16 @@ VrEngine::VrEngine( AdaptorInternalServices& internalServices )
 
   void* FUNCTION_PTRS[] =
   {
-    &TzVR_init,
+    &TzVR_init,                       //todor using
     &TzVR_deinit,
-    &TzVR_start_engine,
+    &TzVR_start_engine,            //todor using
     &TzVR_stop_engine,
-    &TzVR_submit_frame,
-    &TzVR_get_texture_id,
+    &TzVR_submit_frame,            //todor using
+    &TzVR_get_texture_id,            //todor using
     &TzVR_set_texture_id,
-    &TzVR_get_current_pose,
-    &TzVR_get_frame_buffer_depth,
-    &TzVR_create_texture_buffer,
+    &TzVR_get_current_pose,            //todor using
+    &TzVR_get_frame_buffer_depth,            //todor using
+    &TzVR_create_texture_buffer,        //todor using
     &TzVR_destroy_texture_buffer,
     &TzVR_recenter_pose,
     NULL
@@ -101,19 +100,19 @@ VrEngine::~VrEngine()
   }
 }
 
-bool VrEngine::Initialize( Dali::Integration::Vr::VrEngineInitializeParams* initializeParams )
+bool VrEngine::Initialize( unsigned int screenWidth, unsigned int screenHeight )
 {
-  mTizenVrData->screenWidth = initializeParams->screenWidth;
-  mTizenVrData->screenHeight = initializeParams->screenHeight;
+  mTizenVrData->screenWidth = screenWidth;
+  mTizenVrData->screenHeight = screenHeight;
 
   DALI_ASSERT_ALWAYS( TZ_VR_SUCCESS == TzVR_init( mTizenVrData->screenWidth, mTizenVrData->screenHeight, &mTizenVrData->vrContext ) );
   mTizenVrData->frameBufferDepth = TzVR_get_frame_buffer_depth();
 
-  mTizenVrData->eyeBuffers = new TizenVrData::EyeBuffer[ mTizenVrData->frameBufferDepth ];
   mTizenVrData->eyeBufferCount = mTizenVrData->frameBufferDepth;
+  mTizenVrData->eyeBuffers = new TizenVrData::EyeBuffer[ mTizenVrData->frameBufferDepth ];
 
   // Setup GL objects.
-  return SetupVREngine( initializeParams );
+  return SetupVREngine();
 }
 
 EglImplementation* VrEngine::GetEglImplementation()
@@ -131,7 +130,6 @@ EglImplementation* VrEngine::GetEglImplementation()
 
 void VrEngine::Start()
 {
-  std::cout << "todor: ----------------------- VrEngineTizenVR::Start" << std::endl;
   // This function must run on GL thread.
   EglImplementation* eglImplementation = GetEglImplementation();
   if( eglImplementation )
@@ -143,7 +141,7 @@ void VrEngine::Start()
   }
 }
 
-bool VrEngine::SetupVREngine( Dali::Integration::Vr::VrEngineInitializeParams* initializeParams )
+bool VrEngine::SetupVREngine()
 {
   GlImplementation* glImplementation = static_cast<GlImplementation*>( &mAdaptorInternalServices.GetGlesInterface() );
   if( !glImplementation )
@@ -154,8 +152,9 @@ bool VrEngine::SetupVREngine( Dali::Integration::Vr::VrEngineInitializeParams* i
   GlImplementation& context = *glImplementation;
 
   // Allocate GL objects, 2 objects per single buffer.
-  const int totalBufferCount( mTizenVrData->eyeBufferCount * 2 );
-  uint32_t frameBufferObjects[totalBufferCount], depthTextures[totalBufferCount];
+  const unsigned int totalBufferCount( mTizenVrData->eyeBufferCount * EYE_COUNT ); //todor 2=eyes
+  uint32_t frameBufferObjects[totalBufferCount];
+  uint32_t depthTextures[totalBufferCount];
   context.GenFramebuffers( totalBufferCount, frameBufferObjects );
   context.GenTextures( totalBufferCount, depthTextures );
 
@@ -165,39 +164,41 @@ bool VrEngine::SetupVREngine( Dali::Integration::Vr::VrEngineInitializeParams* i
 
   // Loop to set up all buffers per eye.
   Dali::Integration::Vr::VrEngineRenderTargetInfo renderTargetInfo[mTizenVrData->eyeBufferCount];
-  for( int i = 0; i < mTizenVrData->eyeBufferCount; ++i )
+  for( unsigned int i = 0; i < mTizenVrData->eyeBufferCount; ++i )
   {
     // Loop for each eye.
-    for( int k = 0; k < 2; ++k )
+    for( unsigned int k = 0; k < EYE_COUNT; ++k )
     {
       // Set up render target information.
-      renderTargetInfo[i].frameBufferObjects[k] = frameBufferObjects[( i * 2 ) + k];
+      renderTargetInfo[i].frameBufferObjects[k] = frameBufferObjects[( i * EYE_COUNT ) + k];
       renderTargetInfo[i].colorTextures[k] = 0; // If not given by client side, this must be 0.
-      renderTargetInfo[i].depthTextures[k] = depthTextures[( i * 2 ) + k];
+      renderTargetInfo[i].depthTextures[k] = depthTextures[( i * EYE_COUNT ) + k];
 
       // Generate depth buffers.
       context.BindTexture( GL_TEXTURE_2D, renderTargetInfo[i].depthTextures[k] );
+      // TODO: change to depth 16 after testing
       context.TexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, mTizenVrData->frameBufferWidth, mTizenVrData->frameBufferHeight, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, 0 );
+
       context.TexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
       context.TexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
     }
   }
 
   // Attach render targets.
-  Set( VrProperty::EYE_RENDER_TARGETS, renderTargetInfo, mTizenVrData->eyeBufferCount );
+  SetEyeRenderTargets( renderTargetInfo );
 
   // Attach textures to the frame buffer objects.
   int leftTexture( 0 );
   int rightTexture( 0 );
-  for( int i = 0; i < mTizenVrData->eyeBufferCount; ++i )
+  for( unsigned int i = 0; i < mTizenVrData->eyeBufferCount; ++i )
   {
     // Left eye
-    Dali::Integration::VrEngine::Get( VrProperty::EYE_LEFT_TEXTURE_ID + i, &leftTexture );
-    DALI_ASSERT_ALWAYS( CreateFramebufferTexture( context, renderTargetInfo[i].frameBufferObjects[0], leftTexture, renderTargetInfo[i].depthTextures[0] ) );
+    Get( VrProperty::EYE_LEFT_TEXTURE_ID + i, &leftTexture );
+    DALI_ASSERT_ALWAYS( CreateFramebufferTexture( context, renderTargetInfo[i].frameBufferObjects[Integration::Vr::Eye::LEFT], leftTexture, renderTargetInfo[i].depthTextures[Integration::Vr::Eye::LEFT] ) );
 
     // Right eye
-    Dali::Integration::VrEngine::Get( VrProperty::EYE_RIGHT_TEXTURE_ID + i, &rightTexture );
-    DALI_ASSERT_ALWAYS( CreateFramebufferTexture( context, renderTargetInfo[i].frameBufferObjects[1], rightTexture, renderTargetInfo[i].depthTextures[1] ) );
+    Get( VrProperty::EYE_RIGHT_TEXTURE_ID + i, &rightTexture );
+    DALI_ASSERT_ALWAYS( CreateFramebufferTexture( context, renderTargetInfo[i].frameBufferObjects[Integration::Vr::Eye::RIGHT], rightTexture, renderTargetInfo[i].depthTextures[Integration::Vr::Eye::RIGHT] ) );
   }
   return true;
 }
@@ -248,11 +249,11 @@ bool VrEngine::CreateFramebufferTexture( GlImplementation& context, int frameBuf
   return false;
 }
 
-//todor do something with 3rd param?
-bool VrEngine::Get( const int property, void* output, int )
+bool VrEngine::Get( const int property, void* output )
 {
   switch( property )
   {
+    //todor IsEnabled() ?
     case VrProperty::ENABLED:
     {
       *( reinterpret_cast<bool*>( output ) ) = mEnabled;
@@ -263,142 +264,73 @@ bool VrEngine::Get( const int property, void* output, int )
       *( reinterpret_cast<int*>( output ) ) = mTizenVrData->eyeBufferCount;
       return true;
     }
-    case VrProperty::EYE_BUFFER_WIDTH:
-    {
-      *( reinterpret_cast<int*>( output ) ) = mTizenVrData->frameBufferWidth;
-      return true;
-    }
-    case VrProperty::EYE_BUFFER_HEIGHT:
-    {
-      *( reinterpret_cast<int*>( output ) ) = mTizenVrData->frameBufferHeight;
-      return true;
-    }
-    case VrProperty::EYE_LEFT_CURRENT_TEXTURE_ID:
-    {
-      *( reinterpret_cast<int*>( output ) ) = mTizenVrData->eyeBuffers[(int)( mTizenVrData->frameIndex % mTizenVrData->frameBufferDepth )].colorTextures[0];
-      return true;
-    }
-    case VrProperty::EYE_RIGHT_CURRENT_TEXTURE_ID:
-    {
-      *( reinterpret_cast<int*>( output ) ) = mTizenVrData->eyeBuffers[(int)( mTizenVrData->frameIndex % mTizenVrData->frameBufferDepth )].colorTextures[1];
-      return true;
-    }
-    case VrProperty::EYE_LEFT_CURRENT_FBO_ID:
-    {
-      *( reinterpret_cast<int*>( output ) ) = mTizenVrData->eyeBuffers[(int)( mTizenVrData->frameIndex % mTizenVrData->frameBufferDepth )].frameBufferObjects[0];
-      return true;
-    }
-    case VrProperty::EYE_RIGHT_CURRENT_FBO_ID:
-    {
-      *( reinterpret_cast<int*>( output ) ) = mTizenVrData->eyeBuffers[(int)( mTizenVrData->frameIndex % mTizenVrData->frameBufferDepth )].frameBufferObjects[1];
-      return true;
-    }
     case VrProperty::EYE_CURRENT_POSE:
     {
       return GetCurrentEyePose( reinterpret_cast<Dali::Integration::Vr::VrEngineEyePose*>( output ) );
     }
     default:
     {
-      // Do nothing for unrecognized properties.
-      break;
-    }
-  }
-
-  // Return eye left/right texture ID per particular buffer.
-  // Color textures.
-  if( property >= VrProperty::EYE_LEFT_TEXTURE0_ID && property < ( VrProperty::EYE_LEFT_TEXTURE0_ID + 64 ) ) //todor define value 64
-  {
-    *( reinterpret_cast<int*>( output ) ) = mTizenVrData->eyeBuffers[(int)property - VrProperty::EYE_LEFT_TEXTURE0_ID].colorTextures[0]; //todor remove c-style cast
-    return true;
-  }
-  else if( property >= VrProperty::EYE_RIGHT_TEXTURE0_ID && property < ( VrProperty::EYE_RIGHT_TEXTURE0_ID + 64 ) )
-  {
-    *( reinterpret_cast<int*>( output ) ) = mTizenVrData->eyeBuffers[(int)property - VrProperty::EYE_RIGHT_TEXTURE0_ID].colorTextures[1];
-    return true;
-  }
-
-  // fbos
-  else if( property >= VrProperty::EYE_LEFT_FBO_ID && property < ( VrProperty::EYE_LEFT_FBO_ID + 64 ) )
-  {
-    *( reinterpret_cast<int*>( output ) ) = mTizenVrData->eyeBuffers[(int)property - VrProperty::EYE_LEFT_FBO_ID].frameBufferObjects[0];
-    return true;
-  }
-  else if( property >= VrProperty::EYE_RIGHT_FBO_ID && property < ( VrProperty::EYE_RIGHT_FBO_ID + 64 ) )
-  {
-    *( reinterpret_cast<int*>( output ) ) = mTizenVrData->eyeBuffers[(int)property - VrProperty::EYE_RIGHT_FBO_ID].frameBufferObjects[1];
-    return true;
-  }
-
-  // depth textures
-  else if( property >= VrProperty::EYE_LEFT_DEPTH_TEXTURE_ID && property < ( VrProperty::EYE_LEFT_DEPTH_TEXTURE_ID + 64 ) )
-  {
-    *( reinterpret_cast<int*>( output ) ) = mTizenVrData->eyeBuffers[(int)property - VrProperty::EYE_LEFT_DEPTH_TEXTURE_ID].depthTextures[0];
-    return true;
-  }
-  else if( property >= VrProperty::EYE_RIGHT_DEPTH_TEXTURE_ID && property < ( VrProperty::EYE_RIGHT_DEPTH_TEXTURE_ID + 64 ) )
-  {
-    *( reinterpret_cast<int*>( output ) ) = mTizenVrData->eyeBuffers[(int)property - VrProperty::EYE_RIGHT_DEPTH_TEXTURE_ID].depthTextures[1];
-    return true;
-  }
-  return false;
-}
-
-bool VrEngine::Set( const int property, const void* input, int count )
-{
-  switch( property )
-  {
-    case VrProperty::EYE_RENDER_TARGETS:
-    {
-      const Dali::Integration::Vr::VrEngineRenderTargetInfo* renderTargets = reinterpret_cast<const Dali::Integration::Vr::VrEngineRenderTargetInfo*>( input );
-      DALI_ASSERT_ALWAYS( count <= mTizenVrData->eyeBufferCount );
-      for( int i = 0; i < count; ++i )
+      // Return eye left/right texture ID per particular buffer.
+      // Color textures.
+      if( property >= VrProperty::EYE_LEFT_TEXTURE_ID && property < ( VrProperty::EYE_LEFT_TEXTURE_ID + 64 ) ) //todor define value 64
       {
-        const Dali::Integration::Vr::VrEngineRenderTargetInfo* renderTarget = &renderTargets[i];
-        // Frame buffer objects.
-        mTizenVrData->eyeBuffers[i].frameBufferObjects[0] = renderTarget->frameBufferObjects[0];
-        mTizenVrData->eyeBuffers[i].frameBufferObjects[1] = renderTarget->frameBufferObjects[1];
-
-        // Check state of color textures.
-        if( renderTarget->colorTextures[0] != 0 || renderTarget->colorTextures[1] != 0 )
-        {
-          DALI_ASSERT_ALWAYS( "Color texture IDs are reserved\n" );
-        }
-
-        if( !mTizenVrData->tzvrFramebufferHandle )
-        {
-          mTizenVrData->tzvrFramebufferHandle = TzVR_create_texture_buffer( mTizenVrData->vrContext, TEXTURE_TYPE_2D, mTizenVrData->frameBufferWidth, mTizenVrData->frameBufferHeight );
-        }
-
-        // Get texture IDs.
-        mTizenVrData->eyeBuffers[i].colorTextures[0] = TzVR_get_texture_id( mTizenVrData->vrContext, mTizenVrData->tzvrFramebufferHandle, i, 0 );
-        mTizenVrData->eyeBuffers[i].colorTextures[1] = TzVR_get_texture_id( mTizenVrData->vrContext, mTizenVrData->tzvrFramebufferHandle, i, 1 );
-
-        // Depth textures.
-        mTizenVrData->eyeBuffers[i].depthTextures[0] = renderTarget->depthTextures[0];
-        mTizenVrData->eyeBuffers[i].depthTextures[1] = renderTarget->depthTextures[1];
+        *( reinterpret_cast<int*>( output ) ) = mTizenVrData->eyeBuffers[property - VrProperty::EYE_LEFT_TEXTURE_ID].colorTextures[0]; //todor remove c-style cast
+        return true;
       }
-      break;
-    }
+      else if( property >= VrProperty::EYE_RIGHT_TEXTURE_ID && property < ( VrProperty::EYE_RIGHT_TEXTURE_ID + 64 ) )
+      {
+        *( reinterpret_cast<int*>( output ) ) = mTizenVrData->eyeBuffers[property - VrProperty::EYE_RIGHT_TEXTURE_ID].colorTextures[1];
+        return true;
+      }
 
-    case VrProperty::EYE_BUFFER_WIDTH:
-    {
-      mTizenVrData->frameBufferWidth = *reinterpret_cast<const int*>( input );
-      break;
-    }
-
-    case VrProperty::EYE_BUFFER_HEIGHT:
-    {
-      mTizenVrData->frameBufferHeight = *reinterpret_cast<const int*>( input );
-      break;
-    }
-
-    default:
-    {
-      // Do nothing.
+      // Unrecognised.
       return false;
     }
   }
+
   return true;
+}
+
+void VrEngine::SetEyeRenderTargets( const Dali::Integration::Vr::VrEngineRenderTargetInfo* renderTargets )
+{
+  for( unsigned int i = 0; i < mTizenVrData->eyeBufferCount; ++i )
+  {
+    const Dali::Integration::Vr::VrEngineRenderTargetInfo* renderTarget = &( renderTargets[i] );
+    // Frame buffer objects.
+    mTizenVrData->eyeBuffers[i].frameBufferObjects[Integration::Vr::Eye::LEFT] = renderTarget->frameBufferObjects[Integration::Vr::Eye::LEFT];
+    mTizenVrData->eyeBuffers[i].frameBufferObjects[Integration::Vr::Eye::RIGHT] = renderTarget->frameBufferObjects[Integration::Vr::Eye::RIGHT];
+
+    // Check state of color textures.
+    if( renderTarget->colorTextures[Integration::Vr::Eye::LEFT] != 0 || renderTarget->colorTextures[Integration::Vr::Eye::RIGHT] != 0 )
+    {
+      DALI_ASSERT_ALWAYS( "Color texture IDs are reserved\n" );
+    }
+
+    if( !mTizenVrData->tzvrFramebufferHandle )
+    {
+      mTizenVrData->tzvrFramebufferHandle = TzVR_create_texture_buffer( mTizenVrData->vrContext, TEXTURE_TYPE_2D, mTizenVrData->frameBufferWidth, mTizenVrData->frameBufferHeight );
+    }
+
+    // Get texture IDs.
+    mTizenVrData->eyeBuffers[i].colorTextures[Integration::Vr::Eye::LEFT] = TzVR_get_texture_id( mTizenVrData->vrContext, mTizenVrData->tzvrFramebufferHandle, i, Integration::Vr::Eye::LEFT );
+    mTizenVrData->eyeBuffers[i].colorTextures[Integration::Vr::Eye::RIGHT] = TzVR_get_texture_id( mTizenVrData->vrContext, mTizenVrData->tzvrFramebufferHandle, i, Integration::Vr::Eye::RIGHT );
+
+    // Depth textures.
+    mTizenVrData->eyeBuffers[i].depthTextures[Integration::Vr::Eye::LEFT] = renderTarget->depthTextures[Integration::Vr::Eye::LEFT];
+    mTizenVrData->eyeBuffers[i].depthTextures[Integration::Vr::Eye::RIGHT] = renderTarget->depthTextures[Integration::Vr::Eye::RIGHT];
+  }
+}
+
+void VrEngine::GetEyeBufferInfo( EyeBufferInfo& eyeBufferInfo )
+{
+  eyeBufferInfo.bufferWidth = mTizenVrData->frameBufferWidth;
+  eyeBufferInfo.bufferHeight = mTizenVrData->frameBufferHeight;
+
+  eyeBufferInfo.eye[Integration::Vr::Eye::LEFT].texture = mTizenVrData->eyeBuffers[ mTizenVrData->frameIndex % mTizenVrData->frameBufferDepth ].colorTextures[Integration::Vr::Eye::LEFT];
+  eyeBufferInfo.eye[Integration::Vr::Eye::RIGHT].texture = mTizenVrData->eyeBuffers[ mTizenVrData->frameIndex % mTizenVrData->frameBufferDepth ].colorTextures[Integration::Vr::Eye::RIGHT];
+
+  eyeBufferInfo.eye[Integration::Vr::Eye::LEFT].frameBufferObject = mTizenVrData->eyeBuffers[ mTizenVrData->frameIndex % mTizenVrData->frameBufferDepth ].frameBufferObjects[Integration::Vr::Eye::LEFT];
+  eyeBufferInfo.eye[Integration::Vr::Eye::RIGHT].frameBufferObject = mTizenVrData->eyeBuffers[ mTizenVrData->frameIndex % mTizenVrData->frameBufferDepth ].frameBufferObjects[Integration::Vr::Eye::RIGHT];
 }
 
 void VrEngine::Stop()

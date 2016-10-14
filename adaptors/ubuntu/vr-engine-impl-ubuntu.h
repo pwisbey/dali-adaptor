@@ -14,7 +14,7 @@ namespace Internal
 namespace Adaptor
 {
 
-// TizenVR engine backend. todor
+// TizenVR engine ubuntu backend.
 class VrEngineTizenVR : public Dali::Internal::Adaptor::VrEngine
 {
 public:
@@ -42,7 +42,7 @@ private:
   /**
    * @see Dali::Internal::Adaptor::VrEngine::GetCurrentEyePose
    */
-  bool GetCurrentEyePose( Dali::Integration::Vr::VrEngineEyePose* pose );
+  bool GetCurrentEyePose( Dali::Integration::Vr::VrEngineEyePose* eyePose );
 
 private:
 

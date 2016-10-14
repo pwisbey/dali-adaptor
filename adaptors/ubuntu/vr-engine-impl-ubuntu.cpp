@@ -21,8 +21,6 @@
 #include <netinet/in.h>
 #include <string.h>
 #include <arpa/inet.h>
-//todor
-#include <iostream>
 
 // set 1 if you want to read from real GearVR headset, enabling this flag will
 // override TzVR_get_current_pose() with custom one which will take a feed from the

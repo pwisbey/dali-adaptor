@@ -14,7 +14,7 @@ namespace Internal
 namespace Adaptor
 {
 
-// TizenVR engine backend. todor
+// TizenVR engine Tizen backend.
 class VrEngineTizenVR : public Dali::Internal::Adaptor::VrEngine
 {
 public:

@@ -27,7 +27,7 @@ typedef void *EGLDisplay;
 typedef void *EGLSurface;
 typedef void *EGLContext;
 
-#define RAW_QUAT 1
+//todor #define RAW_QUAT 1
 typedef struct _tzvr_vec3f
 {
   float x, y, z;

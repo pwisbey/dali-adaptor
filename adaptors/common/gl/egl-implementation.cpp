@@ -123,11 +123,15 @@ bool EglImplementation::InitializeGles( EGLNativeDisplayType display, bool isOwn
 
 #else // DALI_GLES_VERSION >= 30
 
+#if 1
     mContextAttribs.Reserve(5);
     mContextAttribs.PushBack( EGL_CONTEXT_CLIENT_VERSION );
     mContextAttribs.PushBack( 2 );
+#if 0
     mContextAttribs.PushBack( EGL_CONTEXT_PRIORITY_LEVEL_IMG );
     mContextAttribs.PushBack( EGL_CONTEXT_PRIORITY_HIGH_IMG );
+#endif
+#endif
 #endif // DALI_GLES_VERSION >= 30
 
     mContextAttribs.PushBack( EGL_NONE );
