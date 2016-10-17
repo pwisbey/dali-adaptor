@@ -32,12 +32,15 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <iomanip>
+#include <fstream>
 
 #include <dali/public-api/images/native-image.h>
 #include <dali/public-api/events/touch-event.h>
 #include <dali/public-api/events/touch-point.h>
 #include <dali/public-api/common/stage.h>
 #include <dali/public-api/images/buffer-image.h>
+#include <dali/public-api/images/pixel.h>
 
 #include <dali/integration-api/debug.h>
 
@@ -278,6 +281,59 @@ struct IpcDataEvMouseOut
   }
 };
 
+#ifdef ENABLE_INDICATOR_IMAGE_SAVING
+
+void SaveIndicatorImage( Dali::NativeImageSourcePtr nativeImageSource )
+{
+  // Save image data to disk in BMP form.
+  static int gFilenameCounter = 0;
+  static const char bmpHeader[] = {
+      0x42, 0x4d, 0x0a, 0xcb, 0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x8a, 0x00, 0x00, 0x00, 0x7c, 0x00,
+      0x00, 0x00,
+      0xe0, 0x01, 0x00, 0x00, // Width  (480)
+      0x1b, 0x00, 0x00, 0x00, // Height ( 27)
+      0x01, 0x00, 0x20, 0x00, 0x03, 0x00,
+      0x00, 0x00, 0x80, 0xca, 0x00, 0x00, 0x13, 0x0b,  0x00, 0x00, 0x13, 0x0b, 0x00, 0x00, 0x00, 0x00,
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  0x00, 0xff, 0x00, 0x00, 0xff, 0x00, 0x00, 0xff,
+      0x00, 0x00, 0xff, 0x00, 0x00, 0x00, 0x42, 0x47,  0x52, 0x73, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00,
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  0x00, 0x00
+    };
+
+  // This is a BMP header with width & height hard-coded in.
+  // The data was first determined by dumping the raw data and inspecting in GIMP, before creating this header data.
+  std::vector<unsigned char> buffer;
+  unsigned int w = 0;
+  unsigned int h = 0;
+  Dali::Pixel::Format pixelFormat;
+  if( nativeImageSource->GetPixels( buffer, w, h, pixelFormat ) )
+  {
+    int imageSize = w * h * 4;
+    std::stringstream fileName;
+    // Give each file an incremental filename.
+    fileName << "/opt/usr/media/Images/out-" << std::setfill( '0' ) << std::setw( 5 ) << gFilenameCounter << ".bmp";
+
+    std::ofstream outfile( fileName.str().c_str(), std::ofstream::binary );
+    if( outfile.is_open() )
+    {
+      DALI_LOG_WARNING( "Saving Indicator Image w:%d, h:%d, %s\n", w, h, fileName.str().c_str() );
+
+      outfile.write( bmpHeader, sizeof( bmpHeader ) / sizeof( bmpHeader[0] ) ); // Size of the BMP header.
+      outfile.write( (const char*)buffer.data(), imageSize );
+      outfile.close();
+      gFilenameCounter++;
+    }
+    else
+    {
+      DALI_LOG_ERROR( "COULD NOT OPEN FOR SAVING: %s\n", fileName.str().c_str() );
+    }
+  }
+}
+
+#endif
+
 } // anonymous namespace
 
 
@@ -501,7 +557,8 @@ Indicator::Indicator( Adaptor* adaptor, Dali::Window::WindowOrientation orientat
   mCurrentSharedFile( 0 ),
   mSharedBufferType( BUFFER_TYPE_SHM ),
   mImpl( NULL ),
-  mBackgroundVisible( false )
+  mBackgroundVisible( false ),
+  mTopMargin( 0 )
 {
   mIndicatorContentActor = Dali::Actor::New();
   mIndicatorContentActor.SetParentOrigin( ParentOrigin::TOP_CENTER );
@@ -648,6 +705,7 @@ void Indicator::SetOpacityMode( Dali::Window::IndicatorBgOpacity mode )
     mIndicatorContentActor.RemoveRenderer( mBackgroundRenderer );
     mBackgroundVisible = false;
   }
+  UpdateTopMargin();
 }
 
 void Indicator::SetVisible( Dali::Window::IndicatorVisibleMode visibleMode, bool forceUpdate )
@@ -678,6 +736,7 @@ void Indicator::SetVisible( Dali::Window::IndicatorVisibleMode visibleMode, bool
     }
 
     mVisible = visibleMode;
+    UpdateTopMargin();
 
     if( mForegroundRenderer && mForegroundRenderer.GetTextures().GetTexture( 0u ) )
     {
@@ -876,6 +935,7 @@ void Indicator::Resize( int width, int height )
     mIndicatorContentActor.SetSize( mImageWidth, mImageHeight );
     mIndicatorActor.SetSize( mImageWidth, mImageHeight );
     mEventActor.SetSize(mImageWidth, mImageHeight);
+    UpdateTopMargin();
   }
 }
 
@@ -1014,6 +1074,16 @@ void Indicator::LoadPixmapImage( Ecore_Ipc_Event_Server_Data *epcEvent )
   }
 }
 
+void Indicator::UpdateTopMargin()
+{
+  int newMargin = (mVisible == Dali::Window::VISIBLE && mOpacityMode == Dali::Window::OPAQUE) ? mImageHeight : 0;
+  if (mTopMargin != newMargin)
+  {
+    mTopMargin = newMargin;
+    mAdaptor->IndicatorSizeChanged( mTopMargin );
+  }
+}
+
 void Indicator::UpdateVisibility()
 {
   if( CheckVisibleState() )
@@ -1088,6 +1158,10 @@ void Indicator::CreateNewPixmapImage()
   DALI_LOG_TRACE_METHOD_FMT( gIndicatorLogFilter, "W:%d H:%d", mImageWidth, mImageHeight );
   Dali::NativeImageSourcePtr nativeImageSource = Dali::NativeImageSource::New( mPixmap );
 
+#ifdef ENABLE_INDICATOR_IMAGE_SAVING
+  SaveIndicatorImage( nativeImageSource );
+#endif
+
   if( nativeImageSource )
   {
     Dali::Texture texture = Dali::Texture::New( *nativeImageSource );
@@ -1095,6 +1169,7 @@ void Indicator::CreateNewPixmapImage()
     mIndicatorContentActor.SetSize( mImageWidth, mImageHeight );
     mIndicatorActor.SetSize( mImageWidth, mImageHeight );
     mEventActor.SetSize( mImageWidth, mImageHeight );
+    UpdateTopMargin();
   }
   else
   {

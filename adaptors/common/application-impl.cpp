@@ -166,21 +166,19 @@ void Application::QuitFromMainLoop()
   // This will trigger OnTerminate(), below, after the main loop has completed.
 }
 
-void Application::OnInit()
+void Application::DoInit()
 {
-  mFramework->AddAbortCallback( MakeCallback( this, &Application::QuitFromMainLoop ) );
-
   CreateWindow();
   CreateAdaptor();
 
   // Run the adaptor
   mAdaptor->Start();
 
-  // Check if user requires no vsyncing and set on X11 Adaptor
+  // Check if user requires no vsyncing and set Adaptor
   bool vsyncOnRender = true;
   if( mCommandLineOptions->noVSyncOnRender.set )
   {
-    vsyncOnRender = mCommandLineOptions->noVSyncOnRender.value;
+    vsyncOnRender = !mCommandLineOptions->noVSyncOnRender.value;
   }
   mAdaptor->SetUseHardwareVSync( vsyncOnRender );
 
@@ -204,6 +202,41 @@ void Application::OnInit()
     Dali::StyleMonitor::Get().SetTheme( mStylesheet );
   }
 
+  mAdaptor->NotifySceneCreated();
+}
+
+void Application::DoTerminate()
+{
+  if( mAdaptor )
+  {
+    // Ensure that the render-thread is not using the surface(window) after we delete it
+    mAdaptor->Stop();
+  }
+
+  mWindow.Reset();
+}
+
+void Application::DoPause()
+{
+  mAdaptor->Pause();
+}
+
+void Application::DoResume()
+{
+  mAdaptor->Resume();
+}
+
+void Application::DoLanguageChange()
+{
+  mAdaptor->NotifyLanguageChanged();
+}
+
+void Application::OnInit()
+{
+  mFramework->AddAbortCallback( MakeCallback( this, &Application::QuitFromMainLoop ) );
+
+  DoInit();
+
   // Wire up the LifecycleController
   Dali::LifecycleController lifecycleController = Dali::LifecycleController::Get();
 
@@ -217,8 +250,6 @@ void Application::OnInit()
 
   Dali::Application application(this);
   mInitSignal.Emit( application );
-
-  mAdaptor->NotifySceneCreated();
 }
 
 void Application::OnTerminate()
@@ -229,18 +260,12 @@ void Application::OnTerminate()
   Dali::Application application(this);
   mTerminateSignal.Emit( application );
 
-  if( mAdaptor )
-  {
-    // Ensure that the render-thread is not using the surface(window) after we delete it
-    mAdaptor->Stop();
-  }
-
-  mWindow.Reset();
+  DoTerminate();
 }
 
 void Application::OnPause()
 {
-  mAdaptor->Pause();
+  DoPause();
   Dali::Application application(this);
   mPauseSignal.Emit( application );
 }
@@ -251,7 +276,7 @@ void Application::OnResume()
   // This ensures we do not just redraw the last frame before pausing if that's not required
   Dali::Application application(this);
   mResumeSignal.Emit( application );
-  mAdaptor->Resume();
+  DoResume();
 }
 
 void Application::OnReset()
@@ -272,7 +297,7 @@ void Application::OnAppControl(void *data)
 
 void Application::OnLanguageChanged()
 {
-  mAdaptor->NotifyLanguageChanged();
+  DoLanguageChange();
   Dali::Application application(this);
   mLanguageChangedSignal.Emit( application );
 }

@@ -380,6 +380,7 @@ Configuration
   OpenGL ES version:                $enable_gles
   Tizen Platform Config supported   $tizenPlatformConfigSupported
   Use TizenVR Engine:               $enable_tizenvr
+
 "
 # optional output of node.js source path if we're building with libuv
 if test "x$build_for_libuv" != "xno"; then
