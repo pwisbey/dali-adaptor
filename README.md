@@ -3,13 +3,13 @@
 # Table of Contents
 
    * [Build Instructions](#build-instructions)
-      * [1. GBS Builds](#1-gbs-builds)
-         * [DEBUG Builds](#debug-builds)
-      * [2. Building for Ubuntu desktop](#2-building-for-ubuntu-desktop)
+      * [1. Building for Ubuntu desktop](#1-building-for-ubuntu-desktop)
          * [Minimum Requirements](#minimum-requirements)
          * [Building the Repository](#building-the-repository)
          * [Build target options](#build-target-options)
          * [Building and executing test cases](#building-and-executing-test-cases)
+      * [2. GBS Builds](#2-gbs-builds)
+         * [DEBUG Builds](#debug-builds)
       * [3. Building for Emscripten](#3-building-for-emscripten)
          * [Setup dali-env &amp; build dali-core](#setup-dali-env--build-dali-core)
          * [Build the minimal dali-adaptor](#build-the-minimal-dali-adaptor)
