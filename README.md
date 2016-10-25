@@ -17,19 +17,11 @@
 
 # Build Instructions
 
-## 1. GBS Builds
-
-         $ gbs build -A [TARGET_ARCH]
-
-### DEBUG Builds
-
-         $ gbs build -A [TARGET_ARCH] --define "%enable_debug 1"
-
-## 2. Building for Ubuntu desktop
+## 1. Building for Ubuntu desktop
 
 ### Minimum Requirements
 
- - Ubuntu 14.04
+ - Ubuntu 14.04 or later
  - Environment created using dali_env script in dali-core repository
 
 ### Building the Repository
@@ -61,6 +53,14 @@ Add to the gbs build line: *--define "%target_gles_version X"*
 ### Building and executing test cases
 
 See the README.md in dali-adaptor/automated-tests.
+
+## 2. GBS Builds
+
+         $ gbs build -A [TARGET_ARCH]
+
+### DEBUG Builds
+
+         $ gbs build -A [TARGET_ARCH] --define "%enable_debug 1"
 
 ## 3. Building for Emscripten
 
